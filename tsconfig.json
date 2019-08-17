@@ -17,7 +17,15 @@
     "lib": [
       "es2018",
       "dom"
-    ]
+    ],
+    "paths": {
+      "@arxis/fireauth": [
+        "dist/arxis/fireauth"
+      ],
+      "@arxis/fireauth/*": [
+        "dist/arxis/fireauth/*"
+      ]
+    }
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,

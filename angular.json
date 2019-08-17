@@ -120,6 +120,41 @@
           }
         }
       }
+    },
+    "@arxis/fireauth": {
+      "projectType": "library",
+      "root": "projects/arxis/fireauth",
+      "sourceRoot": "projects/arxis/fireauth/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "projects/arxis/fireauth/tsconfig.lib.json",
+            "project": "projects/arxis/fireauth/ng-package.json"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/arxis/fireauth/src/test.ts",
+            "tsConfig": "projects/arxis/fireauth/tsconfig.spec.json",
+            "karmaConfig": "projects/arxis/fireauth/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/arxis/fireauth/tsconfig.lib.json",
+              "projects/arxis/fireauth/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
     }},
   "defaultProject": "arxis"
 }
