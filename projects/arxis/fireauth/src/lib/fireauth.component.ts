@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'lib-fireauth',
+  selector: 'arxis-fireauth',
   template: `
     <p>
       fireauth works!

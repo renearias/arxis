@@ -125,7 +125,7 @@
       "projectType": "library",
       "root": "projects/arxis/fireauth",
       "sourceRoot": "projects/arxis/fireauth/src",
-      "prefix": "lib",
+      "prefix": "arxis",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-ng-packagr:build",
@@ -155,6 +155,7 @@
           }
         }
       }
-    }},
+    }
+  },
   "defaultProject": "arxis"
 }
