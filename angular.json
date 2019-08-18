@@ -155,6 +155,41 @@
           }
         }
       }
+    },
+    "@arxis/api": {
+      "projectType": "library",
+      "root": "projects/arxis/api",
+      "sourceRoot": "projects/arxis/api/src",
+      "prefix": "arxis",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "projects/arxis/api/tsconfig.lib.json",
+            "project": "projects/arxis/api/ng-package.json"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/arxis/api/src/test.ts",
+            "tsConfig": "projects/arxis/api/tsconfig.spec.json",
+            "karmaConfig": "projects/arxis/api/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/arxis/api/tsconfig.lib.json",
+              "projects/arxis/api/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
     }
   },
   "defaultProject": "arxis"

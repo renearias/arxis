@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { ApiService } from 'projects/arxis/api/src/public-api';
 
 @Component({
   selector: 'app-root',
@@ -7,4 +8,7 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'arxis';
+  constructor(api: ApiService) {
+    console.log('ApiService', api);
+  }
 }

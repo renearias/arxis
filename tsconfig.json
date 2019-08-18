@@ -24,6 +24,12 @@
       ],
       "@arxis/fireauth/*": [
         "dist/arxis/fireauth/*"
+      ],
+      "@arxis/api": [
+        "dist/arxis/api"
+      ],
+      "@arxis/api/*": [
+        "dist/arxis/api/*"
       ]
     }
   },
