@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 
-import { FireauthService } from './fireauth.service';
+import { ArxisFireAuthService } from './fire-auth.service';
 
-describe('FireauthService', () => {
+describe('ArxisFireAuthService', () => {
   beforeEach(() => TestBed.configureTestingModule({}));
 
   it('should be created', () => {
-    const service: FireauthService = TestBed.get(FireauthService);
+    const service: ArxisFireAuthService = TestBed.get(ArxisFireAuthService);
     expect(service).toBeTruthy();
   });
 });
