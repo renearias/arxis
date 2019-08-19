@@ -5,7 +5,7 @@ import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { ArxisFireStoreAuthService } from '../services/user/firestore-auth.service';
 import { ArxisIonicFireStoreAuthService } from '../services/user/ionic-firestore-auth.service';
-import { IonicModule, Platform } from '@ionic/angular';
+import { IonicModule } from '@ionic/angular';
 import { Firebase } from '@ionic-native/firebase/ngx';
 
 @NgModule({
