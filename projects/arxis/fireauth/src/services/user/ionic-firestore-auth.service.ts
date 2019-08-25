@@ -118,4 +118,10 @@ export class ArxisIonicFireStoreAuthService extends ArxisFireStoreAuthService {
       })
     );
   }
+
+  logout(): any {
+    const logout = super.logout();
+    this.firebasePlugin.unregister();
+    return logout;
+  }
 }
