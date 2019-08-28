@@ -43,6 +43,19 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
     return seq;
   }
 
+  loginWithCredential(
+    credential: firebase.auth.AuthCredential
+  ): Promise<firebase.auth.UserCredential> {
+    const promise: Promise<
+      firebase.auth.UserCredential
+    > = this.afAuth.auth
+      .signInWithCredential(credential)
+      .then((userCredential: firebase.auth.UserCredential) => {
+        return userCredential;
+      });
+    return promise;
+  }
+
   loginFB() {
     const provider = new firebase.auth.FacebookAuthProvider();
 
