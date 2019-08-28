@@ -111,6 +111,19 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
     }
   }
 
+  /**
+   * Check if user has provider
+   */
+  hasProvider(user: firebase.User, providerId: string) {
+    if (!user) {
+      return false;
+    }
+    const index = user.providerData.findIndex((provider: firebase.UserInfo) => {
+      return provider.providerId === providerId;
+    });
+    return index !== -1;
+  }
+
   createEmailCredential(email: string, password: string) {
     return firebase.auth.EmailAuthProvider.credential(email, password);
   }
