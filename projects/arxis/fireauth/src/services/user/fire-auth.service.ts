@@ -82,8 +82,13 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
 
   async isValidEmailForSignUp(email: string) {
     try {
-      const res = await this.afAuth.auth.fetchSignInMethodsForEmail(email);
-      if (res.length === 0) {
+      const methods = await this.afAuth.auth.fetchSignInMethodsForEmail(email);
+      const hasPasswordMethod: boolean =
+        methods.findIndex(method => {
+          return method === 'password';
+        }) !== -1;
+
+      if (!hasPasswordMethod) {
         return true;
       } else {
         return false;
@@ -91,6 +96,19 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
     } catch (error) {
       throw error;
     }
+  }
+
+  createEmailCredential(email: string, password: string) {
+    return firebase.auth.EmailAuthProvider.credential(email, password);
+  }
+
+  linkAccount(
+    credential: firebase.auth.AuthCredential
+  ): Promise<firebase.auth.UserCredential> {
+    if (!this.currentUser) {
+      return Promise.reject({ code: 'user-no-auth', message: 'user-no-auth' });
+    }
+    return this.currentUser.linkWithCredential(credential);
   }
 
   updateDisplayName(name: string) {
