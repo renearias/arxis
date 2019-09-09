@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, InjectionToken, Inject, Optional } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
 import {
   AngularFirestore,
@@ -12,6 +12,10 @@ import { switchMap, map, tap } from 'rxjs/operators';
 import { ArxisFireStoreAuthService } from './firestore-auth.service';
 import { Platform } from '@ionic/angular';
 import { Firebase } from '@ionic-native/firebase/ngx';
+
+export const ROUTE_FCM_DOC = new InjectionToken<string>(
+  'arxis.fireauth.ROUTE_FCM_DOC'
+);
 
 @Injectable()
 export class ArxisIonicFireStoreAuthService extends ArxisFireStoreAuthService {
@@ -30,7 +34,10 @@ export class ArxisIonicFireStoreAuthService extends ArxisFireStoreAuthService {
     public afAuth: AngularFireAuth,
     public afs: AngularFirestore,
     public firebasePlugin: Firebase,
-    public platform: Platform
+    public platform: Platform,
+    @Optional()
+    @Inject(ROUTE_FCM_DOC)
+    private routeFCMDoc: string
   ) {
     super(afAuth, afs);
     this.platformReady().subscribe(() => {
@@ -74,7 +81,7 @@ export class ArxisIonicFireStoreAuthService extends ArxisFireStoreAuthService {
         if (u) {
           this.userDevicesFCMDoc = this.userFireStoreDoc
             .collection('devices')
-            .doc('FCM');
+            .doc(this.routeFCMDoc || 'FCM');
           return of(u).pipe(
             switchMap(us => {
               if (this.platform.is('cordova')) {
