@@ -5,10 +5,11 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:fireauth": "cd projects/arxis/fireauth && npm version patch && ng build @arxis/fireauth",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "fireauth:publish": "cd dist/arxis/fireauth&&npm publish --access public"
+    "publish:fireauth": "cd dist/arxis/fireauth&&npm publish --access public"
   },
   "private": true,
   "dependencies": {

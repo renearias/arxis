@@ -82,6 +82,7 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
     seq
       .then(newUser => {
         // this.preSavedAccountInfo=accountInfo;
+        this._loggedIn(newUser);
         return newUser;
       })
       .catch(error => {
