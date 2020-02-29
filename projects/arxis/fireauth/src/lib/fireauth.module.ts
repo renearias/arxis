@@ -1,6 +1,6 @@
 import { NgModule, ModuleWithProviders } from '@angular/core';
 import { ArxisFireAuthService } from '../services/user/fire-auth.service';
-import { AngularFireModule, FirebaseOptionsToken } from '@angular/fire';
+import { AngularFireModule, FIREBASE_OPTIONS } from '@angular/fire';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { ArxisFireStoreAuthService } from '../services/user/firestore-auth.service';
@@ -11,7 +11,8 @@ import {
 import { IonicModule } from '@ionic/angular';
 import { Firebase } from '@ionic-native/firebase/ngx';
 import { ArxisSmsAuthService } from '../services';
-
+import 'firebase/auth';
+import 'firebase/firestore';
 @NgModule({
   declarations: [],
   imports: [
@@ -24,12 +25,12 @@ import { ArxisSmsAuthService } from '../services';
   providers: []
 })
 export class ArxisFireAuthModule {
-  static forRoot(options: { [key: string]: any }): ModuleWithProviders {
+  static forRoot(options: { [key: string]: any }): ModuleWithProviders<ArxisFireAuthModule> {
     return {
       ngModule: ArxisFireAuthModule,
       providers: [
         Firebase,
-        { provide: FirebaseOptionsToken, useValue: options },
+        { provide: FIREBASE_OPTIONS, useValue: options },
         { provide: ROUTE_FCM_DOC, useValue: 'FCM' },
         ArxisFireAuthService,
         ArxisFireStoreAuthService,

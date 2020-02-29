@@ -25,7 +25,7 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
    * the user entered on the form.
    */
   login(accountInfo: any) {
-    const seq = this.afAuth.auth
+    const seq = this.afAuth
       .signInWithEmailAndPassword(accountInfo.email, accountInfo.password)
       .then((res: firebase.auth.UserCredential) => {
         return res.user;
@@ -48,7 +48,7 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
   ): Promise<firebase.auth.UserCredential> {
     const promise: Promise<
       firebase.auth.UserCredential
-    > = this.afAuth.auth
+    > = this.afAuth
       .signInWithCredential(credential)
       .then((userCredential: firebase.auth.UserCredential) => {
         return userCredential;
@@ -59,7 +59,7 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
   loginFB() {
     const provider = new firebase.auth.FacebookAuthProvider();
 
-    return this.afAuth.auth
+    return this.afAuth
       .signInWithPopup(provider)
       .then(credential => {
         return credential;
@@ -74,7 +74,7 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
    * the user entered on the form.
    */
   signup(accountInfo: any) {
-    const seq = this.afAuth.auth
+    const seq = this.afAuth
       .createUserWithEmailAndPassword(accountInfo.email, accountInfo.password)
       .then((res: firebase.auth.UserCredential) => {
         return res.user;
@@ -96,7 +96,7 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
 
   async isValidEmailForSignUp(email: string) {
     try {
-      const methods = await this.afAuth.auth.fetchSignInMethodsForEmail(email);
+      const methods = await this.afAuth.fetchSignInMethodsForEmail(email);
       const hasPasswordMethod: boolean =
         methods.findIndex(method => {
           return method === 'password';
@@ -157,7 +157,7 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
    * Log the user out, which forgets the session
    */
   logout(): Promise<void> {
-    const logout = this.afAuth.auth.signOut();
+    const logout = this.afAuth.signOut();
     logout
       .then(() => {
         // this.emptyUserData();

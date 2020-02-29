@@ -14,7 +14,7 @@ export function _apiServiceFactory(endpoint: EndPointConfig, http: HttpClient) {
   exports: []
 })
 export class ApiModule {
-  static forRoot(enpoint: EndPointConfig): ModuleWithProviders {
+  static forRoot(enpoint: EndPointConfig): ModuleWithProviders<ApiModule> {
     return {
       ngModule: ApiModule,
       providers: [{ provide: API_ENDPOINT_CONFIG, useValue: enpoint }, ApiService]

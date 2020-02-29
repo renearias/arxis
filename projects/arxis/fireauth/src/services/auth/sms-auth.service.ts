@@ -90,7 +90,7 @@ export class ArxisSmsAuthService {
       return seq as Promise<any>;
     } else {
       this.recaptchaVerifier = verifier;
-      const seq = this.afAuth.auth
+      const seq = this.afAuth
         .signInWithPhoneNumber(phone, this.recaptchaVerifier)
         .then(confirmationResult => {
           // SMS sent. Prompt user to type the code from the message, then sign the
