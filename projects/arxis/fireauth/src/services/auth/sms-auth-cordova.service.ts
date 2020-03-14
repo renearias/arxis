@@ -1,23 +1,19 @@
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
+import { Firebase } from '@ionic-native/firebase/ngx';
+import { Platform } from '@ionic/angular';
 // import { Pro } from '@ionic/pro';
 import * as firebase from 'firebase/app';
 import 'firebase/auth';
 import * as _ from 'lodash';
 import { ArxisSmsAuthInterface } from './sms-auth.interface';
-import {
-  cfaSignIn,
-  cfaSignInPhoneOnCodeSent,
-  cfaSignInPhoneOnCodeReceived
-} from 'capacitor-firebase-auth';
-import { ArxisDeviceService } from '../device/device';
-import { switchMap } from 'rxjs/operators';
+
 @Injectable()
-export class ArxisSmsAuthService implements ArxisSmsAuthInterface {
+export class ArxisSmsCordovaAuthService implements ArxisSmsAuthInterface {
   constructor(
     public afAuth: AngularFireAuth,
-    // public firebasePlugin: Firebase,
-    public platform: ArxisDeviceService
+    public firebasePlugin: Firebase,
+    public platform: Platform
   ) {}
 
   verificationId: string;
@@ -28,22 +24,26 @@ export class ArxisSmsAuthService implements ArxisSmsAuthInterface {
     phone: any,
     verifier?: firebase.auth.RecaptchaVerifier
   ): Promise<string> {
-    if (this.platform.is('android')) {
-      const seq: Promise<string> = new Promise((resolve, reject) => {
-        cfaSignIn('phone', { phone })
-          .pipe(
-            switchMap(() => {
-              return cfaSignInPhoneOnCodeSent();
-            })
-          )
-          .toPromise()
-          .then(verificationId => {
-            this.verificationId = verificationId;
-            // resolve(this.verificationId);
+    if (this.platform.is('cordova') && this.platform.is('android')) {
+      const seq = new Promise((resolve, reject) => {
+        this.firebasePlugin
+          .verifyPhoneNumber(phone, 60)
+          .then(credential => {
+            this.verificationId = credential.verificationId;
+            resolve(this.verificationId);
           })
           .catch(error => {
-            // TODO: Registrar eventos de error
-            console.log('error', error);
+            // Pro.getApp().monitoring.log(
+            //   'verifyPhoneNumberFailed',
+            //   { level: 'error' },
+            //   error
+            // );
+            this.firebasePlugin.logEvent('verifyPhoneNumberFailed', {
+              phone,
+              deviceType: 'android',
+              error
+            });
+            this.firebasePlugin.logError('verifyPhoneNumberFailed');
             alert(
               'Ocurrio un error al verificar el numero telefonico por favor inicia sesion con tu email y contraseña'
             );
@@ -51,21 +51,20 @@ export class ArxisSmsAuthService implements ArxisSmsAuthInterface {
           });
       });
 
-      return seq;
-    } else if (this.platform.is('ios')) {
+      return seq as Promise<any>;
+    } else if (this.platform.is('cordova') && this.platform.is('ios')) {
       const seq = new Promise((resolve, reject) => {
-        this.platform
-          .hasPermissionNotifications()
+        this.firebasePlugin
+          .hasPermission()
           .then(data => {
-            // this.firebasePlugin.logEvent('userHasPermissionIOS', {
-            //   isEnabled: data.isEnabled || 'no data'
-            // });
-            console.log('data', data);
-            if (data.state !== 'granted') {
-              this.platform.requestPushNotifications().then(value => {
-                // this.firebasePlugin.logEvent('userRequestPermissionIOS', {
-                //   value
-                // });
+            this.firebasePlugin.logEvent('userHasPermissionIOS', {
+              isEnabled: data.isEnabled || 'no data'
+            });
+            if (!data.isEnabled) {
+              this.firebasePlugin.grantPermission().then(value => {
+                this.firebasePlugin.logEvent('userRequestPermissionIOS', {
+                  value
+                });
                 this.sendSMSVerificationIOS(phone)
                   .then(verificationId => {
                     resolve(verificationId);
@@ -115,23 +114,29 @@ export class ArxisSmsAuthService implements ArxisSmsAuthInterface {
     }
   }
 
-  sendSMSVerificationIOS(phone: string): Promise<string> {
-    const seq: Promise<string> = new Promise((resolve, reject) => {
-      cfaSignIn('phone', { phone })
-        .pipe(
-          switchMap(() => {
-            return cfaSignInPhoneOnCodeSent();
-          })
-        )
-        .toPromise()
+  sendSMSVerificationIOS(phone: string) {
+    const seq = new Promise((resolve, reject) => {
+      this.firebasePlugin
+        // .getVerificationID(phone)
+        .verifyPhoneNumber(phone)
         .then(verificationId => {
           // change
           this.verificationId = verificationId;
           resolve(this.verificationId);
         })
         .catch(error => {
-          // TODO: Logs de Eror
-          console.log('error', error);
+          // Pro.getApp().monitoring.log(
+          //   'verifyPhoneNumberFailed',
+          //   { level: 'error' },
+          //   error.message
+          // );
+          this.firebasePlugin.logEvent('verifyPhoneNumberFailed', {
+            phone,
+            deviceType: 'ios',
+            errorCode: error.code || 'no code',
+            error: error.message || 'no message'
+          });
+          this.firebasePlugin.logError('verifyPhoneNumberFailed');
           alert(
             'Ocurrio un error al verificar el numero telefonico por favor inicia sesion con tu email y contraseña'
           );
