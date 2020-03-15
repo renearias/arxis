@@ -11,7 +11,7 @@ import { Observable, of, from, BehaviorSubject, iif } from 'rxjs';
 import { switchMap, map, tap } from 'rxjs/operators';
 import { ArxisFireStoreAuthService } from './firestore-auth.service';
 import { Platform } from '@ionic/angular';
-import { Firebase } from '@ionic-native/firebase/ngx';
+import { FirebaseX } from '@ionic-native/firebase-X/ngx';
 
 export const ROUTE_FCM_DOC = new InjectionToken<string>(
   'arxis.fireauth.ROUTE_FCM_DOC'
@@ -33,7 +33,7 @@ export class ArxisIonicFireStoreCordovaAuthService extends ArxisFireStoreAuthSer
   constructor(
     public afAuth: AngularFireAuth,
     public afs: AngularFirestore,
-    public firebasePlugin: Firebase,
+    public firebasePlugin: FirebaseX,
     public platform: Platform,
     @Optional()
     @Inject(ROUTE_FCM_DOC)

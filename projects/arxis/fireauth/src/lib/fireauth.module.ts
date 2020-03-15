@@ -9,7 +9,7 @@ import {
   ROUTE_FCM_DOC
 } from '../services/user/ionic-firestore-auth.service';
 import { IonicModule } from '@ionic/angular';
-import { Firebase } from '@ionic-native/firebase/ngx';
+import { FirebaseX } from '@ionic-native/firebase-x/ngx';
 import { ArxisSmsAuthService } from '../services';
 import 'firebase/auth';
 import 'firebase/firestore';
@@ -29,7 +29,7 @@ export class ArxisFireAuthModule {
     return {
       ngModule: ArxisFireAuthModule,
       providers: [
-        Firebase,
+        FirebaseX,
         { provide: FIREBASE_OPTIONS, useValue: options },
         { provide: ROUTE_FCM_DOC, useValue: 'FCM' },
         ArxisFireAuthService,

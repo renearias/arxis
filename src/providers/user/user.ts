@@ -3,8 +3,7 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import {
   AngularFirestore,
 } from '@angular/fire/firestore';
-import { ArxisIonicFireStoreAuthService as ArxisUser } from '@arxis/fireauth';
-import { Firebase } from '@ionic-native/firebase/ngx';
+import { ArxisIonicFireStoreAuthService as ArxisUser, ArxisDeviceService } from '@arxis/fireauth';
 import { Platform } from '@ionic/angular';
 import 'firebase/auth';
 import * as _ from 'lodash';
@@ -35,10 +34,10 @@ export class User extends ArxisUser {
   constructor(
     public afAuth: AngularFireAuth,
     public afs: AngularFirestore,
-    public firebasePlugin: Firebase,
+    public device: ArxisDeviceService,
     public platform: Platform,
     @Inject(ROUTE_FCM_DOC) routeFCMDoc: string,
   ) {
-    super(afAuth, afs, firebasePlugin, platform, routeFCMDoc);
+    super(afAuth, afs, device, platform, routeFCMDoc);
   }
 }

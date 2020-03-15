@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { Firebase } from '@ionic-native/firebase/ngx';
+import { FirebaseX } from '@ionic-native/firebase-x/ngx';
 import { Platform } from '@ionic/angular';
 // import { Pro } from '@ionic/pro';
 import * as firebase from 'firebase/app';
@@ -12,7 +12,7 @@ import { ArxisSmsAuthInterface } from './sms-auth.interface';
 export class ArxisSmsCordovaAuthService implements ArxisSmsAuthInterface {
   constructor(
     public afAuth: AngularFireAuth,
-    public firebasePlugin: Firebase,
+    public firebasePlugin: FirebaseX,
     public platform: Platform
   ) {}
 
@@ -24,10 +24,37 @@ export class ArxisSmsCordovaAuthService implements ArxisSmsAuthInterface {
     phone: any,
     verifier?: firebase.auth.RecaptchaVerifier
   ): Promise<string> {
+    let awaitingSms = false;
     if (this.platform.is('cordova') && this.platform.is('android')) {
       const seq = new Promise((resolve, reject) => {
         this.firebasePlugin
-          .verifyPhoneNumber(phone, 60)
+          .verifyPhoneNumber(
+            (credential: any) => {
+              if (credential.instantVerification) {
+                if (awaitingSms) {
+                  awaitingSms = false;
+                  // the Android device used auto-retrieval to extract and submit the verification code in the SMS so dismiss user input UI
+                  //dismissUserPromptToInputCode();
+                }
+                //signInWithCredential(credential);
+              } else {
+                awaitingSms = true;
+                // promptUserToInputCode() // you need to implement this
+                // .then(function(userEnteredCode) {
+                //   awaitingSms = false;
+                //   credential.code = userEnteredCode; // set the user-entered verification code on the credential object
+                //   signInWithCredential(credential);
+                // });
+              }
+            },
+            error => {
+              console.error(
+                'Failed to verify phone number: ' + JSON.stringify(error)
+              );
+            },
+            phone,
+            60
+          )
           .then(credential => {
             this.verificationId = credential.verificationId;
             resolve(this.verificationId);
@@ -56,11 +83,11 @@ export class ArxisSmsCordovaAuthService implements ArxisSmsAuthInterface {
       const seq = new Promise((resolve, reject) => {
         this.firebasePlugin
           .hasPermission()
-          .then(data => {
+          .then(isEnabled => {
             this.firebasePlugin.logEvent('userHasPermissionIOS', {
-              isEnabled: data.isEnabled || 'no data'
+              isEnabled: isEnabled || 'no data'
             });
-            if (!data.isEnabled) {
+            if (!isEnabled) {
               this.firebasePlugin.grantPermission().then(value => {
                 this.firebasePlugin.logEvent('userRequestPermissionIOS', {
                   value
@@ -115,10 +142,36 @@ export class ArxisSmsCordovaAuthService implements ArxisSmsAuthInterface {
   }
 
   sendSMSVerificationIOS(phone: string) {
+    let awaitingSms = false;
     const seq = new Promise((resolve, reject) => {
       this.firebasePlugin
         // .getVerificationID(phone)
-        .verifyPhoneNumber(phone)
+        .verifyPhoneNumber(
+          (credential: any) => {
+            if (credential.instantVerification) {
+              if (awaitingSms) {
+                awaitingSms = false;
+                // the Android device used auto-retrieval to extract and submit the verification code in the SMS so dismiss user input UI
+                //dismissUserPromptToInputCode();
+              }
+              //signInWithCredential(credential);
+            } else {
+              awaitingSms = true;
+              // promptUserToInputCode() // you need to implement this
+              // .then(function(userEnteredCode) {
+              //   awaitingSms = false;
+              //   credential.code = userEnteredCode; // set the user-entered verification code on the credential object
+              //   signInWithCredential(credential);
+              // });
+            }
+          },
+          error => {
+            console.error(
+              'Failed to verify phone number: ' + JSON.stringify(error)
+            );
+          },
+          phone
+        )
         .then(verificationId => {
           // change
           this.verificationId = verificationId;
