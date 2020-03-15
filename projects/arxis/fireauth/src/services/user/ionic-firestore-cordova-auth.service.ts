@@ -11,22 +11,14 @@ import { Observable, of, from, BehaviorSubject, iif } from 'rxjs';
 import { switchMap, map, tap } from 'rxjs/operators';
 import { ArxisFireStoreAuthService } from './firestore-auth.service';
 import { Platform } from '@ionic/angular';
-import { ArxisDeviceService } from '../device/device';
-import {
-  Plugins,
-  PushNotification,
-  PushNotificationToken,
-  PushNotificationActionPerformed
-} from '@capacitor/core';
-
-const { PushNotifications } = Plugins;
+import { Firebase } from '@ionic-native/firebase/ngx';
 
 export const ROUTE_FCM_DOC = new InjectionToken<string>(
   'arxis.fireauth.ROUTE_FCM_DOC'
 );
 
 @Injectable()
-export class ArxisIonicFireStoreAuthService extends ArxisFireStoreAuthService {
+export class ArxisIonicFireStoreCordovaAuthService extends ArxisFireStoreAuthService {
   userDevicesFCMDoc: AngularFirestoreDocument<any>;
   $FCMToken: BehaviorSubject<string> = undefined;
 
@@ -41,31 +33,29 @@ export class ArxisIonicFireStoreAuthService extends ArxisFireStoreAuthService {
   constructor(
     public afAuth: AngularFireAuth,
     public afs: AngularFirestore,
-    public device: ArxisDeviceService,
+    public firebasePlugin: Firebase,
     public platform: Platform,
+    @Optional()
     @Inject(ROUTE_FCM_DOC)
     private routeFCMDoc: string
   ) {
     super(afAuth, afs);
     this.platformReady().subscribe(() => {
-      if (this.platform.is('android') || this.platform.is('ios')) {
-        // Register with Apple / Google to receive push via APNS/FCM
-
-        PushNotifications.register()
-          .then(() => {}) // save the token server-side and use it to push notifications to this device
+      if (this.platform.is('cordova')) {
+        this.firebasePlugin
+          .getToken()
+          .then(token => {
+            this.FCMToken = token;
+          }) // save the token server-side and use it to push notifications to this device
           .catch(error => console.error('Error getting token', error));
-
-        PushNotifications.addListener(
-          'registration',
-          (token: PushNotificationToken) => {
-            this.FCMToken = token.value;
-            try {
-              this.registerFCMToken();
-            } catch (e) {
-              console.log('Error updating token', e);
-            }
+        this.firebasePlugin.onTokenRefresh().subscribe((token: string) => {
+          this.FCMToken = token;
+          try {
+            this.registerFCMToken();
+          } catch (e) {
+            console.log('Error updating token', e);
           }
-        );
+        });
       }
     });
   }
@@ -94,8 +84,8 @@ export class ArxisIonicFireStoreAuthService extends ArxisFireStoreAuthService {
             .doc(this.routeFCMDoc || 'FCM');
           return of(u).pipe(
             switchMap(us => {
-              if (this.platform.is('android') || this.platform.is('ios')) {
-                return from(this.$FCMToken).pipe(
+              if (this.platform.is('cordova')) {
+                return from(this.firebasePlugin.getToken()).pipe(
                   switchMap(this.registerFCMToken.bind(this)),
                   switchMap(() => {
                     return of(us);
@@ -138,6 +128,7 @@ export class ArxisIonicFireStoreAuthService extends ArxisFireStoreAuthService {
 
   logout(): any {
     const logout = super.logout();
+    this.firebasePlugin.unregister();
     return logout;
   }
 }
