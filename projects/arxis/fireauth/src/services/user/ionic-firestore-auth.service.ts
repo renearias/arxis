@@ -47,8 +47,8 @@ export class ArxisIonicFireStoreAuthService extends ArxisFireStoreAuthService {
     private routeFCMDoc: string
   ) {
     super(afAuth, afs);
-    this.platformReady().subscribe(() => {
-      if (this.platform.is('android') || this.platform.is('ios')) {
+    this.platformReady().subscribe(async () => {
+      if ((await this.device.is('android')) || (await this.device.is('ios'))) {
         // Register with Apple / Google to receive push via APNS/FCM
 
         PushNotifications.register()
