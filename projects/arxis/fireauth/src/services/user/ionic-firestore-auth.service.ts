@@ -93,8 +93,11 @@ export class ArxisIonicFireStoreAuthService extends ArxisFireStoreAuthService {
             .collection('devices')
             .doc(this.routeFCMDoc || 'FCM');
           return of(u).pipe(
-            switchMap(us => {
-              if (this.platform.is('android') || this.platform.is('ios')) {
+            switchMap(async us => {
+              if (
+                (await this.device.is('android')) ||
+                (await this.device.is('ios'))
+              ) {
                 return from(this.$FCMToken).pipe(
                   switchMap(this.registerFCMToken.bind(this)),
                   switchMap(() => {
