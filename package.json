@@ -6,6 +6,7 @@
     "start": "ng serve",
     "build": "ng build",
     "build:fireauth": "cd projects/arxis/fireauth && npm version patch && ng build @arxis/fireauth --prod",
+    "deploy:fireauth": "npm run build:fireauth && npm run publish:fireauth ",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",

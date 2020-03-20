@@ -6,17 +6,16 @@ import 'firebase/auth';
 import * as _ from 'lodash';
 import { ArxisSmsAuthInterface } from './sms-auth.interface';
 import {
-  cfaSignIn,
+  cfaSignInPhone,
   cfaSignInPhoneOnCodeSent,
   cfaSignInPhoneOnCodeReceived
 } from 'capacitor-firebase-auth';
 import { ArxisDeviceService } from '../device/device';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, take } from 'rxjs/operators';
 @Injectable()
 export class ArxisSmsAuthService implements ArxisSmsAuthInterface {
   constructor(
     public afAuth: AngularFireAuth,
-    // public firebasePlugin: Firebase,
     public platform: ArxisDeviceService
   ) {}
 
@@ -30,10 +29,10 @@ export class ArxisSmsAuthService implements ArxisSmsAuthInterface {
   ): Promise<string> {
     if (this.platform.is('android')) {
       const seq: Promise<string> = new Promise((resolve, reject) => {
-        cfaSignIn('phone', { phone })
+        cfaSignInPhone(phone)
           .pipe(
             switchMap(() => {
-              return cfaSignInPhoneOnCodeSent();
+              return cfaSignInPhoneOnCodeSent().pipe(take(1));
             })
           )
           .toPromise()
@@ -117,14 +116,16 @@ export class ArxisSmsAuthService implements ArxisSmsAuthInterface {
 
   sendSMSVerificationIOS(phone: string): Promise<string> {
     const seq: Promise<string> = new Promise((resolve, reject) => {
-      cfaSignIn('phone', { phone })
+      cfaSignInPhone(phone)
         .pipe(
-          switchMap(() => {
-            return cfaSignInPhoneOnCodeSent();
+          switchMap(response => {
+            console.log('response de ios', response);
+            return cfaSignInPhoneOnCodeSent().pipe(take(1));
           })
         )
         .toPromise()
         .then(verificationId => {
+          console.log("response de verification id")
           // change
           this.verificationId = verificationId;
           resolve(this.verificationId);
