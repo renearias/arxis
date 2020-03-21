@@ -29,25 +29,25 @@ export class ArxisSmsAuthService implements ArxisSmsAuthInterface {
   ): Promise<string> {
     if (this.platform.is('android')) {
       const seq: Promise<string> = new Promise((resolve, reject) => {
-        cfaSignInPhone(phone)
-          .pipe(
-            switchMap(() => {
-              return cfaSignInPhoneOnCodeSent().pipe(take(1));
-            })
-          )
-          .toPromise()
-          .then(verificationId => {
-            this.verificationId = verificationId;
-            // resolve(this.verificationId);
-          })
-          .catch(error => {
-            // TODO: Registrar eventos de error
-            console.log('error', error);
-            alert(
-              'Ocurrio un error al verificar el numero telefonico por favor inicia sesion con tu email y contraseña'
-            );
+        cfaSignInPhone(phone).subscribe(
+          () => {},
+          error => {
+            console.log('error on cfaSignInPhone', error);
             reject(error);
-          });
+          }
+        );
+
+        cfaSignInPhoneOnCodeSent().subscribe(
+          verificationId => {
+            this.verificationId = verificationId;
+            resolve(verificationId);
+          },
+          error => {
+            // TODO: Registrar eventos de error
+            console.log('error cfaSignInPhoneOnCodeSent', error);
+            reject(error);
+          }
+        );
       });
 
       return seq;
@@ -67,6 +67,7 @@ export class ArxisSmsAuthService implements ArxisSmsAuthInterface {
                 // });
                 this.sendSMSVerificationIOS(phone)
                   .then(verificationId => {
+                    this.verificationId = verificationId;
                     resolve(verificationId);
                   })
                   .catch(error => {
@@ -116,28 +117,25 @@ export class ArxisSmsAuthService implements ArxisSmsAuthInterface {
 
   sendSMSVerificationIOS(phone: string): Promise<string> {
     const seq: Promise<string> = new Promise((resolve, reject) => {
-      cfaSignInPhone(phone)
-        .pipe(
-          switchMap(response => {
-            console.log('response de ios', response);
-            return cfaSignInPhoneOnCodeSent().pipe(take(1));
-          })
-        )
-        .toPromise()
-        .then(verificationId => {
-          console.log("response de verification id")
-          // change
-          this.verificationId = verificationId;
-          resolve(this.verificationId);
-        })
-        .catch(error => {
-          // TODO: Logs de Eror
-          console.log('error', error);
-          alert(
-            'Ocurrio un error al verificar el numero telefonico por favor inicia sesion con tu email y contraseña'
-          );
+      cfaSignInPhone(phone).subscribe(
+        () => {},
+        error => {
+          console.log('error on cfaSignInPhone', error);
           reject(error);
-        });
+        }
+      );
+
+      cfaSignInPhoneOnCodeSent().subscribe(
+        verificationId => {
+          this.verificationId = verificationId;
+          resolve(verificationId);
+        },
+        error => {
+          // TODO: Registrar eventos de error
+          console.log('error on phone code sent', error);
+          reject(error);
+        }
+      );
     });
 
     return seq;
