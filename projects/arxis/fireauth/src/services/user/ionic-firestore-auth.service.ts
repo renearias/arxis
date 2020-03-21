@@ -28,7 +28,7 @@ export const ROUTE_FCM_DOC = new InjectionToken<string>(
 @Injectable()
 export class ArxisIonicFireStoreAuthService extends ArxisFireStoreAuthService {
   userDevicesFCMDoc: AngularFirestoreDocument<any>;
-  $FCMToken: BehaviorSubject<string> = undefined;
+  $FCMToken: BehaviorSubject<string> = new BehaviorSubject(undefined);
 
   get FCMToken() {
     return this.$FCMToken.value;
@@ -47,7 +47,7 @@ export class ArxisIonicFireStoreAuthService extends ArxisFireStoreAuthService {
     private routeFCMDoc: string
   ) {
     super(afAuth, afs);
-    this.platformReady().subscribe(async () => {
+    this.platformReady().subscribe(async user => {
       if ((await this.device.is('android')) || (await this.device.is('ios'))) {
         // Register with Apple / Google to receive push via APNS/FCM
 
@@ -60,7 +60,9 @@ export class ArxisIonicFireStoreAuthService extends ArxisFireStoreAuthService {
           (token: PushNotificationToken) => {
             this.FCMToken = token.value;
             try {
-              this.registerFCMToken();
+              if (user) {
+                this.registerFCMToken();
+              }
             } catch (e) {
               console.log('Error updating token', e);
             }
@@ -77,11 +79,7 @@ export class ArxisIonicFireStoreAuthService extends ArxisFireStoreAuthService {
   }
 
   platformReady(user?: firebase.User) {
-    return from(this.platform.ready()).pipe(
-      switchMap(platform => {
-        return of(user);
-      })
-    );
+    return of(user);
   }
 
   authFillAction(user: firebase.User): Observable<any> {
