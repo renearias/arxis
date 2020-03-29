@@ -124,8 +124,8 @@ export class ArxisSmsAuthService implements ArxisSmsAuthInterface {
   sendSMSVerificationAndroidAlternative(
     phone: any,
     verifier?: firebase.auth.RecaptchaVerifier
-  ): Promise<firebase.auth.AuthCredential> {
-    const seq: Promise<firebase.auth.AuthCredential> = new Promise(
+  ): Promise<firebase.auth.UserCredential> {
+    const seq: Promise<firebase.auth.UserCredential> = new Promise(
       (resolve, reject) => {
         cfaSignInPhoneAlternative(phone).subscribe(
           ({
@@ -135,7 +135,7 @@ export class ArxisSmsAuthService implements ArxisSmsAuthInterface {
             userCredential: firebase.auth.UserCredential;
             result: PhoneSignInResult;
           }) => {
-            resolve(userCredential.credential);
+            resolve(userCredential);
           },
           error => {
             console.log('error on cfaSignInPhone', error);
