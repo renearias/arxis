@@ -12,6 +12,12 @@ import {
 } from 'capacitor-firebase-auth';
 import { ArxisDeviceService } from '../device/device';
 import { switchMap, take } from 'rxjs/operators';
+import {
+  cfaSignInPhone as cfaSignInPhoneAlternative,
+  PhoneSignInResult
+} from 'capacitor-firebase-auth/alternative';
+// import {SignInResult} from './definitions';
+
 @Injectable()
 export class ArxisSmsAuthService implements ArxisSmsAuthInterface {
   constructor(
@@ -112,6 +118,35 @@ export class ArxisSmsAuthService implements ArxisSmsAuthInterface {
       });
 
       return seq as Promise<any>;
+    }
+  }
+
+  sendSMSVerificationAndroidAlternative(
+    phone: any,
+    verifier?: firebase.auth.RecaptchaVerifier
+  ): Promise<firebase.auth.AuthCredential> {
+    if (this.platform.is('android')) {
+      const seq: Promise<firebase.auth.AuthCredential> = new Promise(
+        (resolve, reject) => {
+          cfaSignInPhoneAlternative(phone).subscribe(
+            ({
+              userCredential,
+              result
+            }: {
+              userCredential: firebase.auth.UserCredential;
+              result: PhoneSignInResult;
+            }) => {
+              resolve(userCredential.credential);
+            },
+            error => {
+              console.log('error on cfaSignInPhone', error);
+              reject(error);
+            }
+          );
+        }
+      );
+
+      return seq;
     }
   }
 
