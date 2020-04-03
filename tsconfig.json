@@ -30,6 +30,10 @@
       ],
       "@arxis/api/*": [
         "dist/arxis/api/*"
+      ],
+      "@arxis/image-processor": [
+        "dist/arxis/image-processor/arxis-image-processor",
+        "dist/arxis/image-processor"
       ]
     }
   },

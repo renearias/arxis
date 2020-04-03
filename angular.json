@@ -199,6 +199,46 @@
           }
         }
       }
+    },
+    "@arxis/image-processor": {
+      "projectType": "library",
+      "root": "projects/arxis/image-processor",
+      "sourceRoot": "projects/arxis/image-processor/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "projects/arxis/image-processor/tsconfig.lib.json",
+            "project": "projects/arxis/image-processor/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/arxis/image-processor/tsconfig.lib.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/arxis/image-processor/src/test.ts",
+            "tsConfig": "projects/arxis/image-processor/tsconfig.spec.json",
+            "karmaConfig": "projects/arxis/image-processor/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/arxis/image-processor/tsconfig.lib.json",
+              "projects/arxis/image-processor/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
     }
   },
   "defaultProject": "arxis"
