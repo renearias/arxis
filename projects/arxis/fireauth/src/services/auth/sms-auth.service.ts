@@ -29,11 +29,11 @@ export class ArxisSmsAuthService implements ArxisSmsAuthInterface {
   confirmationResult: any;
   recaptchaVerifier: any;
 
-  sendSMSVerification(
+  async sendSMSVerification(
     phone: any,
     verifier?: firebase.auth.RecaptchaVerifier
   ): Promise<string> {
-    if (this.platform.is('android')) {
+    if (await this.platform.is('android')) {
       const seq: Promise<string> = new Promise((resolve, reject) => {
         cfaSignInPhone(phone).subscribe(
           () => {},
@@ -57,7 +57,7 @@ export class ArxisSmsAuthService implements ArxisSmsAuthInterface {
       });
 
       return seq;
-    } else if (this.platform.is('ios')) {
+    } else if (await this.platform.is('ios')) {
       const seq = new Promise((resolve, reject) => {
         this.platform
           .hasPermissionNotifications()

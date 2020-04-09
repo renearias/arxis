@@ -1,6 +1,6 @@
 {
   "name": "@arxis/fireauth",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "peerDependencies": {
     "@angular/common": "^9.0.4",
     "@angular/core": "^9.0.4",
