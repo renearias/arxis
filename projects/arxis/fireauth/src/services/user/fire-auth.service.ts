@@ -6,7 +6,7 @@ import 'firebase/auth';
 import * as _ from 'lodash';
 import { Observable } from 'rxjs';
 import { ArxisAuthAbstractService } from './auth-abstract.service';
-import { CapacitorFirebaseAuthPlugin, cfaSignInFacebook, cfaSignOut, FacebookSignInResult } from 'capacitor-firebase-auth';
+import { CapacitorFirebaseAuthPlugin, cfaSignInFacebook, cfaSignOut, FacebookSignInResult } from 'capacitor-firebase-auth/alternative';
 import { Plugins } from '@capacitor/core';
 import { IProviderUserData } from '../../interfaces';
 import ProviderAuthException from '../../exceptions/provider-auth-exception';
@@ -218,21 +218,17 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
    */
   async loginWithFacebook(allowNew = false) {
     try {
-      const user: firebase.User = await cfaSignInFacebook().toPromise();
+      const { result, userCredential } = await cfaSignInFacebook().toPromise();
+      const user = userCredential.user;
 
       if (!allowNew && !this.hasProvider(user, 'password')) { // Comprobar si cuenta ha sido creada
-        const plugin: CapacitorFirebaseAuthPlugin = Plugins.CapacitorFirebaseAuth as CapacitorFirebaseAuthPlugin;
-
-        const providerId = firebase.auth.FacebookAuthProvider.PROVIDER_ID;
-        const result = await plugin.signIn({ providerId }) as FacebookSignInResult; // 💩
-
         const data: IProviderUserData = {
           email: user.email || undefined,
           name: user.displayName || undefined,
           phone: user.phoneNumber || undefined,
         };
 
-        cfaSignOut();
+        await cfaSignOut().toPromise();
 
         await user.delete();
 
