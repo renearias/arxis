@@ -22,7 +22,8 @@ export default class ProviderAuthException extends Error {
     super(message);
 
     // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
-    Object.setPrototypeOf(this, ProviderAuthException.prototype);
+    // https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-2.html#support-for-newtarget
+    Object.setPrototypeOf(this, new.target.prototype);
   }
 
   get credential(): firebase.auth.OAuthCredential | undefined {
