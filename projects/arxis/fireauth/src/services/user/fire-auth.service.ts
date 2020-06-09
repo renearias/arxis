@@ -6,6 +6,10 @@ import 'firebase/auth';
 import * as _ from 'lodash';
 import { Observable } from 'rxjs';
 import { ArxisAuthAbstractService } from './auth-abstract.service';
+import { CapacitorFirebaseAuthPlugin, cfaSignInFacebook, cfaSignOut, FacebookSignInResult } from 'capacitor-firebase-auth';
+import { Plugins } from '@capacitor/core';
+import { IProviderUserData } from '../../interfaces';
+import ProviderAuthException from '../../exceptions/provider-auth-exception';
 
 @Injectable({
   providedIn: 'root'
@@ -56,6 +60,10 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
     return promise;
   }
 
+  /**
+   *
+   * @deprecated loginWithFacebook()
+   */
   loginFB() {
     const provider = new firebase.auth.FacebookAuthProvider();
 
@@ -195,5 +203,64 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
         console.log('ocurrioun erooor', error);
       }
     );
+  }
+
+
+
+
+  /**
+   * Intenta iniciar sesión con Facebook. Si no está registrado, obtiene la credential para proceder a enlazarlo.
+   *
+   * @param allowNew Indica si se mantiene la cuenta con sólo Facebook. Si es falso, retornará las credenciales y datos
+   *  para crear la cuenta y enlazar Facebook luego.
+   *
+   * @throws ProviderAuthException
+   */
+  async loginWithFacebook(allowNew = false) {
+    try {
+      const user: firebase.User = await cfaSignInFacebook().toPromise();
+
+      if (!allowNew && !this.hasProvider(user, 'password')) { // Comprobar si cuenta ha sido creada
+        const plugin: CapacitorFirebaseAuthPlugin = Plugins.CapacitorFirebaseAuth as CapacitorFirebaseAuthPlugin;
+
+        const providerId = firebase.auth.FacebookAuthProvider.PROVIDER_ID;
+        const result = await plugin.signIn({ providerId }) as FacebookSignInResult; // 💩
+
+        const data: IProviderUserData = {
+          email: user.email || undefined,
+          name: user.displayName || undefined,
+          phone: user.phoneNumber || undefined,
+        };
+
+        cfaSignOut();
+
+        await user.delete();
+
+        throw new ProviderAuthException(
+          'auth/unregistered',
+          `Usuario de Facebook aún no registrado: ${user.email}.`,
+          data,
+          result
+        );
+      }
+
+      return user;
+    } catch (err) {
+      if (err instanceof ProviderAuthException) {
+        throw err;
+      }
+
+      const { oauthAccessToken, message, email } = JSON.parse(JSON.stringify(err)) as { [i: string]: string | undefined};
+
+      throw new ProviderAuthException(
+        err.code,
+        message,
+        {
+          email
+        },
+        oauthAccessToken ? new FacebookSignInResult(oauthAccessToken) : undefined,
+        err
+      );
+    }
   }
 }
