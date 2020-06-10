@@ -42,10 +42,11 @@ export class IncompleteRegistrationService {
     if (this.providerResult) {
       switch (this.providerResult.providerId) {
         case firebase.auth.FacebookAuthProvider.PROVIDER_ID:
-        case firebase.auth.GoogleAuthProvider.PROVIDER_ID:
-          const fb = this.providerResult as FacebookSignInResult | GoogleSignInResult;
+          credential = firebase.auth.FacebookAuthProvider.credential((this.providerResult as FacebookSignInResult).idToken);
+          break;
 
-          credential = firebase.auth.FacebookAuthProvider.credential(fb.idToken);
+        case firebase.auth.GoogleAuthProvider.PROVIDER_ID:
+          credential = firebase.auth.GoogleAuthProvider.credential((this.providerResult as GoogleSignInResult).idToken);
           break;
 
         case firebase.auth.TwitterAuthProvider.PROVIDER_ID:
