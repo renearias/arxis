@@ -12,6 +12,7 @@ import { NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 import {
   API_ENDPOINT_CONFIG,
+  ApiService,
   ApiModule
 } from '@arxis/api';
 
@@ -19,6 +20,7 @@ import {
   declarations: [AppComponent],
   imports: [BrowserModule, ApiModule],
   providers: [
+    ApiService,
     { provide: API_ENDPOINT_CONFIG, useValue: { url: 'http://examplex.com' } }
   ],
   bootstrap: [AppComponent]
