@@ -6,6 +6,15 @@ import 'firebase/auth';
 import * as _ from 'lodash';
 import { Observable } from 'rxjs';
 import { ArxisAuthAbstractService } from './auth-abstract.service';
+import {
+  cfaSignIn,
+  cfaSignOut,
+  FacebookSignInResult,
+  GoogleSignInResult,
+  SignInResult,
+} from 'capacitor-firebase-auth/alternative';
+import { IProviderUserData } from '../../interfaces';
+import ProviderAuthException from '../../exceptions/provider-auth-exception';
 
 @Injectable({
   providedIn: 'root'
@@ -56,6 +65,10 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
     return promise;
   }
 
+  /**
+   *
+   * @deprecated loginWithFacebook()
+   */
   loginFB() {
     const provider = new firebase.auth.FacebookAuthProvider();
 
@@ -195,5 +208,107 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
         console.log('ocurrioun erooor', error);
       }
     );
+  }
+
+
+
+  /**
+   * Intenta iniciar sesión con el provider especificado de forma nativa y extenderlo a web.
+   *
+   * @param allowIncompleteRegister Indica si se mantiene la cuenta sin contraseña.
+   *   Si es falso, disparará una ProviderAuthException ({ code: 'auth/unregistered' }) que contendrá las credenciales
+   *   para enlazar con la cuenta completa luego.
+   *
+   * @throws ProviderAuthException
+   */
+  async loginWith(providerId: 'facebook.com' | 'google.com', allowIncompleteRegister = false) {
+    try {
+      const { result, userCredential } = await cfaSignIn(providerId).toPromise();
+      const user = userCredential.user;
+
+      // Comprueba si el usuario no ha completado el registro si no se permite...
+      if (!allowIncompleteRegister && !this.hasProvider(user, 'password')) {
+        const data: IProviderUserData = {
+          email: user.email || undefined,
+          name: user.displayName || undefined,
+          phone: user.phoneNumber || undefined,
+        };
+
+        await cfaSignOut().toPromise();
+
+        await user.delete();
+
+        throw new ProviderAuthException(
+          'auth/unregistered',
+          `User with email '${user.email}' has not completed its registration.`,
+          data,
+          result
+        );
+      }
+
+      return user;
+    } catch (err) {
+      if (err instanceof ProviderAuthException) {
+        throw err;
+      }
+
+      const { oauthAccessToken, message, email } = JSON.parse(JSON.stringify(err)) as { [i: string]: string | undefined};
+
+
+      let result: SignInResult | undefined;
+
+      if (oauthAccessToken) {
+        switch (providerId) {
+          case 'google.com':
+            result = new GoogleSignInResult(oauthAccessToken);
+            break;
+
+          case 'facebook.com':
+            result = new FacebookSignInResult(oauthAccessToken);
+            break;
+
+          default:
+            result = undefined;
+            break;
+        }
+      }
+
+      throw new ProviderAuthException(
+        err.code,
+        message,
+        {
+          email
+        },
+        result,
+        err
+      );
+    }
+  }
+
+
+  /**
+   * Intenta iniciar sesión con Facebook de forma nativa y extenderlo a web.
+   *
+   * @param allowIncompleteRegister Indica si se mantiene la cuenta sin contraseña.
+   *   Si es falso, disparará una ProviderAuthException ({ code: 'auth/unregistered' }) que contendrá las credenciales
+   *   para enlazar con la cuenta completa luego.
+   *
+   * @throws ProviderAuthException
+   */
+  async loginWithFacebook(allowNew = false) {
+    return await this.loginWith('facebook.com', allowNew);
+  }
+
+  /**
+   * Intenta iniciar sesión con Google de forma nativa y extenderlo a web.
+   *
+   * @param allowIncompleteRegister Indica si se mantiene la cuenta sin contraseña.
+   *   Si es falso, disparará una ProviderAuthException ({ code: 'auth/unregistered' }) que contendrá las credenciales
+   *   para enlazar con la cuenta completa luego.
+   *
+   * @throws ProviderAuthException
+   */
+  async loginWithGoogle(allowNew = false) {
+    return await this.loginWith('google.com', allowNew);
   }
 }

@@ -7,6 +7,7 @@ import { ArxisFireStoreAuthService } from './user/firestore-auth.service';
 import { ArxisSmsCordovaAuthService } from './auth/sms-auth-cordova.service';
 import { ArxisSmsAuthService } from './auth/sms-auth.service';
 import { ArxisDeviceService } from './device/device';
+import { IncompleteRegistrationService } from './auth/incomplete-registration.service';
 export {
   ArxisDeviceService,
   ArxisFireAuthService,
@@ -14,5 +15,6 @@ export {
   ArxisIonicFireStoreAuthService,
   ArxisSmsCordovaAuthService,
   ArxisSmsAuthService,
+  IncompleteRegistrationService,
   ROUTE_FCM_DOC
 };
