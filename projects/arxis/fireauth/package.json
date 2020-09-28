@@ -5,10 +5,11 @@
     "@angular/common": "^9.0.4",
     "@angular/core": "^9.0.4",
     "@angular/fire": "^6.0.0-rc.1",
+    "@capacitor/core": "^2.4.2",
     "@ionic-native/core": "^5.12.0",
     "@ionic-native/firebase-x": "^5.22.0",
     "@ionic/angular": "^4.7.4",
-    "capacitor-firebase-auth": "^0.3.0",
+    "capacitor-firebase-auth": "^2.3.2",
     "firebase": "^7.9.3",
     "lodash": "^4.17.15"
   }

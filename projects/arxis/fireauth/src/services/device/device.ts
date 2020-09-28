@@ -1,4 +1,9 @@
-import { Plugins, DeviceInfo, PermissionType, PermissionResult } from '@capacitor/core';
+import {
+  Plugins,
+  DeviceInfo,
+  PermissionType,
+  PermissionResult,
+} from '@capacitor/core';
 
 const { Device, PushNotifications, Permissions } = Plugins;
 
@@ -21,7 +26,10 @@ export class ArxisDeviceService {
   }
 
   async requestPushNotifications() {
-    return PushNotifications.requestPermissions();
+    if (!(PushNotifications as any).requestPermission) {
+      (PushNotifications as any).requestPermissions();
+    }
+    return (PushNotifications as any).requestPermission();
   }
 
   async hasPermissionNotifications(): Promise<PermissionResult> {
