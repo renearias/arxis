@@ -36,7 +36,7 @@
     "@ionic/angular": "^4.7.4",
     "capacitor-firebase-auth": "^0.3.0",
     "firebase": "^7.9.3",
-    "lodash": "^4.17.19",
+    "lodash": "^4.17.20",
     "rxjs": "~6.5.4",
     "tslib": "^1.10.0",
     "zone.js": "~0.10.2"
