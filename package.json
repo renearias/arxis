@@ -33,7 +33,7 @@
     "@ionic-native/camera": "^5.23.0",
     "@ionic-native/core": "^5.12.0",
     "@ionic-native/firebase-x": "^5.22.0",
-    "@ionic/angular": "^4.7.4",
+    "@ionic/angular": "^5.3.5",
     "capacitor-firebase-auth": "^2.3.2",
     "firebase": "^7.22.1",
     "lodash": "^4.17.20",
