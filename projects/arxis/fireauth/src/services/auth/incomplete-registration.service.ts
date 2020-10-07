@@ -1,14 +1,20 @@
 import { Injectable } from '@angular/core';
-import { FacebookSignInResult, GoogleSignInResult, SignInResult, TwitterSignInResult } from 'capacitor-firebase-auth';
-import * as firebase from 'firebase';
+import {
+  FacebookSignInResult,
+  GoogleSignInResult,
+  SignInResult,
+  TwitterSignInResult,
+} from 'capacitor-firebase-auth';
+import { auth } from 'firebase/app';
 import { IProviderResultInfo, IProviderUserData } from '../../interfaces';
 
+import 'firebase/auth';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class IncompleteRegistrationService {
-  public readonly info: IProviderResultInfo = { };
+  public readonly info: IProviderResultInfo = {};
 
   public get providerResult() {
     return this.info.providerResult;
@@ -18,14 +24,16 @@ export class IncompleteRegistrationService {
     return this.info.data;
   }
 
-  constructor() { }
+  constructor() {}
 
   isFacebook(): boolean {
     if (!this.providerResult) {
       return false;
     }
 
-    return this.providerResult.providerId === firebase.auth.FacebookAuthProvider.PROVIDER_ID;
+    return (
+      this.providerResult.providerId === auth.FacebookAuthProvider.PROVIDER_ID
+    );
   }
 
   isGoogle(): boolean {
@@ -33,7 +41,9 @@ export class IncompleteRegistrationService {
       return false;
     }
 
-    return this.providerResult.providerId === firebase.auth.GoogleAuthProvider.PROVIDER_ID;
+    return (
+      this.providerResult.providerId === auth.GoogleAuthProvider.PROVIDER_ID
+    );
   }
 
   getProviderResultCredentials(): firebase.auth.OAuthCredential | undefined {
@@ -41,23 +51,30 @@ export class IncompleteRegistrationService {
 
     if (this.providerResult) {
       switch (this.providerResult.providerId) {
-        case firebase.auth.FacebookAuthProvider.PROVIDER_ID:
-          credential = firebase.auth.FacebookAuthProvider.credential((this.providerResult as FacebookSignInResult).idToken);
+        case auth.FacebookAuthProvider.PROVIDER_ID:
+          credential = auth.FacebookAuthProvider.credential(
+            (this.providerResult as FacebookSignInResult).idToken
+          );
           break;
 
-        case firebase.auth.GoogleAuthProvider.PROVIDER_ID:
-          credential = firebase.auth.GoogleAuthProvider.credential((this.providerResult as GoogleSignInResult).idToken);
+        case auth.GoogleAuthProvider.PROVIDER_ID:
+          credential = auth.GoogleAuthProvider.credential(
+            (this.providerResult as GoogleSignInResult).idToken
+          );
           break;
 
-        case firebase.auth.TwitterAuthProvider.PROVIDER_ID:
+        case auth.TwitterAuthProvider.PROVIDER_ID:
           const r = this.providerResult as TwitterSignInResult;
 
-          credential = firebase.auth.TwitterAuthProvider.credential(r.idToken, r.secret);
+          credential = auth.TwitterAuthProvider.credential(r.idToken, r.secret);
           break;
 
         default:
           // TODO: Compatibilidad con los demás providers
-          console.error(`credential() no implementado para '${this.providerResult.providerId}'. `, this.providerResult);
+          console.error(
+            `credential() no implementado para '${this.providerResult.providerId}'. `,
+            this.providerResult
+          );
           break;
       }
     }

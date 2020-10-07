@@ -1,6 +1,13 @@
-import { SignInResult, FacebookSignInResult, GoogleSignInResult, TwitterSignInResult } from 'capacitor-firebase-auth';
+import {
+  SignInResult,
+  FacebookSignInResult,
+  GoogleSignInResult,
+  TwitterSignInResult,
+} from 'capacitor-firebase-auth';
 import { IProviderUserData } from '../interfaces';
-import * as firebase from 'firebase';
+import { auth } from 'firebase/app';
+
+import 'firebase/auth';
 
 /**
  * Error generado a partir del proceso de autenticación.
@@ -31,19 +38,24 @@ export default class ProviderAuthException extends Error {
 
     if (this.result) {
       switch (this.result.providerId) {
-        case firebase.auth.FacebookAuthProvider.PROVIDER_ID:
-        case firebase.auth.GoogleAuthProvider.PROVIDER_ID:
-          credential = firebase.auth.FacebookAuthProvider.credential((this.result as FacebookSignInResult | GoogleSignInResult).idToken);
+        case auth.FacebookAuthProvider.PROVIDER_ID:
+        case auth.GoogleAuthProvider.PROVIDER_ID:
+          credential = auth.FacebookAuthProvider.credential(
+            (this.result as FacebookSignInResult | GoogleSignInResult).idToken
+          );
           break;
 
-        case firebase.auth.TwitterAuthProvider.PROVIDER_ID:
+        case auth.TwitterAuthProvider.PROVIDER_ID:
           const r = this.result as TwitterSignInResult;
-          credential = firebase.auth.TwitterAuthProvider.credential(r.idToken, r.secret);
+          credential = auth.TwitterAuthProvider.credential(r.idToken, r.secret);
           break;
 
         default:
           // TODO: Compatibilidad con los demás providers
-          console.error(`credential() no implementado para '${this.result.providerId}'. `, this.result);
+          console.error(
+            `credential() no implementado para '${this.result.providerId}'. `,
+            this.result
+          );
           break;
       }
     }
