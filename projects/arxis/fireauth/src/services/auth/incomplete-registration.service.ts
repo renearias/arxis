@@ -7,7 +7,6 @@ import {
 } from 'capacitor-firebase-auth';
 import { auth } from 'firebase/app';
 import { IProviderResultInfo, IProviderUserData } from '../../interfaces';
-
 import 'firebase/auth';
 
 @Injectable({
@@ -46,7 +45,7 @@ export class IncompleteRegistrationService {
     );
   }
 
-  getProviderResultCredentials(): firebase.auth.OAuthCredential | undefined {
+  getProviderResultCredentials(): auth.OAuthCredential | undefined {
     let credential: firebase.auth.OAuthCredential | undefined;
 
     if (this.providerResult) {

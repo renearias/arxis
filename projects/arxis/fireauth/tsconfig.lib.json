@@ -4,12 +4,10 @@
     "outDir": "../../../out-tsc/lib",
     "target": "es2015",
     "declaration": true,
+    "strict": false,
     "inlineSources": true,
     "types": [],
-    "lib": [
-      "dom",
-      "es2018"
-    ],
+    "lib": ["dom", "es2018"],
     "esModuleInterop": true
   },
   "angularCompilerOptions": {
@@ -19,8 +17,5 @@
     "strictInjectionParameters": true,
     "enableResourceInlining": true
   },
-  "exclude": [
-    "src/test.ts",
-    "**/*.spec.ts"
-  ]
+  "exclude": ["src/test.ts", "**/*.spec.ts"]
 }

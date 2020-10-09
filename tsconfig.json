@@ -5,32 +5,20 @@
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,
+    "strict": true,
     "downlevelIteration": true,
     "experimentalDecorators": true,
     "module": "esnext",
     "moduleResolution": "node",
     "importHelpers": true,
     "target": "es2015",
-    "typeRoots": [
-      "node_modules/@types"
-    ],
-    "lib": [
-      "es2018",
-      "dom"
-    ],
+    "typeRoots": ["node_modules/@types"],
+    "lib": ["es2018", "dom"],
     "paths": {
-      "@arxis/fireauth": [
-        "dist/arxis/fireauth"
-      ],
-      "@arxis/fireauth/*": [
-        "dist/arxis/fireauth/*"
-      ],
-      "@arxis/api": [
-        "dist/arxis/api"
-      ],
-      "@arxis/api/*": [
-        "dist/arxis/api/*"
-      ],
+      "@arxis/fireauth": ["dist/arxis/fireauth"],
+      "@arxis/fireauth/*": ["dist/arxis/fireauth/*"],
+      "@arxis/api": ["dist/arxis/api"],
+      "@arxis/api/*": ["dist/arxis/api/*"],
       "@arxis/image-processor": [
         "dist/arxis/image-processor/arxis-image-processor",
         "dist/arxis/image-processor"

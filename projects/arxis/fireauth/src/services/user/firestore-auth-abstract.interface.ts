@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
-import * as firebase from 'firebase/app';
+import { User } from 'firebase/app';
 
 export interface ArxisFirestoreAuthAbstractInterface<T> {
-  authFillAction(user: firebase.User): Observable<T>;
+  authFillAction(user: User | null): Observable<T>;
 }

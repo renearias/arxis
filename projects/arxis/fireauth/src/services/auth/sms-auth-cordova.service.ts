@@ -34,9 +34,9 @@ export class ArxisSmsCordovaAuthService implements ArxisSmsAuthInterface {
                 if (awaitingSms) {
                   awaitingSms = false;
                   // the Android device used auto-retrieval to extract and submit the verification code in the SMS so dismiss user input UI
-                  //dismissUserPromptToInputCode();
+                  // dismissUserPromptToInputCode();
                 }
-                //signInWithCredential(credential);
+                // signInWithCredential(credential);
               } else {
                 awaitingSms = true;
                 // promptUserToInputCode() // you need to implement this
@@ -47,7 +47,7 @@ export class ArxisSmsCordovaAuthService implements ArxisSmsAuthInterface {
                 // });
               }
             },
-            error => {
+            (error) => {
               console.error(
                 'Failed to verify phone number: ' + JSON.stringify(error)
               );
@@ -55,11 +55,11 @@ export class ArxisSmsCordovaAuthService implements ArxisSmsAuthInterface {
             phone,
             60
           )
-          .then(credential => {
+          .then((credential) => {
             this.verificationId = credential.verificationId;
             resolve(this.verificationId);
           })
-          .catch(error => {
+          .catch((error) => {
             // Pro.getApp().monitoring.log(
             //   'verifyPhoneNumberFailed',
             //   { level: 'error' },
@@ -68,7 +68,7 @@ export class ArxisSmsCordovaAuthService implements ArxisSmsAuthInterface {
             this.firebasePlugin.logEvent('verifyPhoneNumberFailed', {
               phone,
               deviceType: 'android',
-              error
+              error,
             });
             this.firebasePlugin.logError('verifyPhoneNumberFailed');
             alert(
@@ -83,34 +83,34 @@ export class ArxisSmsCordovaAuthService implements ArxisSmsAuthInterface {
       const seq = new Promise((resolve, reject) => {
         this.firebasePlugin
           .hasPermission()
-          .then(isEnabled => {
+          .then((isEnabled) => {
             this.firebasePlugin.logEvent('userHasPermissionIOS', {
-              isEnabled: isEnabled || 'no data'
+              isEnabled: isEnabled || 'no data',
             });
             if (!isEnabled) {
-              this.firebasePlugin.grantPermission().then(value => {
+              this.firebasePlugin.grantPermission().then((value) => {
                 this.firebasePlugin.logEvent('userRequestPermissionIOS', {
-                  value
+                  value,
                 });
                 this.sendSMSVerificationIOS(phone)
-                  .then(verificationId => {
+                  .then((verificationId) => {
                     resolve(verificationId);
                   })
-                  .catch(error => {
+                  .catch((error) => {
                     reject(error);
                   });
               });
             } else {
               this.sendSMSVerificationIOS(phone)
-                .then(verificationId => {
+                .then((verificationId) => {
                   resolve(verificationId);
                 })
-                .catch(error => {
+                .catch((error) => {
                   reject(error);
                 });
             }
           })
-          .catch(error => {
+          .catch((error) => {
             reject(error);
           });
       });
@@ -120,7 +120,7 @@ export class ArxisSmsCordovaAuthService implements ArxisSmsAuthInterface {
       this.recaptchaVerifier = verifier;
       const seq = this.afAuth
         .signInWithPhoneNumber(phone, this.recaptchaVerifier)
-        .then(confirmationResult => {
+        .then((confirmationResult) => {
           // SMS sent. Prompt user to type the code from the message, then sign the
           // user in with confirmationResult.confirm(code).
           this.confirmationResult = confirmationResult;
@@ -129,7 +129,7 @@ export class ArxisSmsCordovaAuthService implements ArxisSmsAuthInterface {
           return this.verificationId;
         });
 
-      seq.catch(error => {
+      seq.catch((error) => {
         // Error; SMS not sent
         // ...
         console.error('ERROR', error);
@@ -152,9 +152,9 @@ export class ArxisSmsCordovaAuthService implements ArxisSmsAuthInterface {
               if (awaitingSms) {
                 awaitingSms = false;
                 // the Android device used auto-retrieval to extract and submit the verification code in the SMS so dismiss user input UI
-                //dismissUserPromptToInputCode();
+                // dismissUserPromptToInputCode();
               }
-              //signInWithCredential(credential);
+              // signInWithCredential(credential);
             } else {
               awaitingSms = true;
               // promptUserToInputCode() // you need to implement this
@@ -165,19 +165,19 @@ export class ArxisSmsCordovaAuthService implements ArxisSmsAuthInterface {
               // });
             }
           },
-          error => {
+          (error) => {
             console.error(
               'Failed to verify phone number: ' + JSON.stringify(error)
             );
           },
           phone
         )
-        .then(verificationId => {
+        .then((verificationId) => {
           // change
           this.verificationId = verificationId;
           resolve(this.verificationId);
         })
-        .catch(error => {
+        .catch((error) => {
           // Pro.getApp().monitoring.log(
           //   'verifyPhoneNumberFailed',
           //   { level: 'error' },
@@ -187,7 +187,7 @@ export class ArxisSmsCordovaAuthService implements ArxisSmsAuthInterface {
             phone,
             deviceType: 'ios',
             errorCode: error.code || 'no code',
-            error: error.message || 'no message'
+            error: error.message || 'no message',
           });
           this.firebasePlugin.logError('verifyPhoneNumberFailed');
           alert(

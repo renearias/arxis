@@ -2,22 +2,17 @@ import { Injectable, InjectionToken, Inject, Optional } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
 import {
   AngularFirestore,
-  AngularFirestoreDocument
+  AngularFirestoreDocument,
 } from '@angular/fire/firestore';
-import * as firebase from 'firebase/app';
+import { User } from 'firebase/app';
 import 'firebase/auth';
 import * as _ from 'lodash';
-import { Observable, of, from, BehaviorSubject, iif } from 'rxjs';
-import { switchMap, map, tap } from 'rxjs/operators';
+import { Observable, of, from, BehaviorSubject } from 'rxjs';
+import { switchMap, map } from 'rxjs/operators';
 import { ArxisFireStoreAuthService } from './firestore-auth.service';
 import { Platform } from '@ionic/angular';
 import { ArxisDeviceService } from '../device/device';
-import {
-  Plugins,
-  PushNotification,
-  PushNotificationToken,
-  PushNotificationActionPerformed
-} from '@capacitor/core';
+import { Plugins, PushNotificationToken } from '@capacitor/core';
 
 const { PushNotifications } = Plugins;
 
@@ -27,8 +22,8 @@ export const ROUTE_FCM_DOC = new InjectionToken<string>(
 
 @Injectable()
 export class ArxisIonicFireStoreAuthService extends ArxisFireStoreAuthService {
-  userDevicesFCMDoc: AngularFirestoreDocument<any>;
-  $FCMToken: BehaviorSubject<string> = new BehaviorSubject(undefined);
+  userDevicesFCMDoc: AngularFirestoreDocument<any> | undefined;
+  $FCMToken: BehaviorSubject<string> = new BehaviorSubject('');
 
   get FCMToken() {
     return this.$FCMToken.value;
@@ -47,13 +42,13 @@ export class ArxisIonicFireStoreAuthService extends ArxisFireStoreAuthService {
     private routeFCMDoc: string
   ) {
     super(afAuth, afs);
-    this.platformReady().subscribe(async user => {
+    this.platformReady().subscribe(async (user) => {
       if ((await this.device.is('android')) || (await this.device.is('ios'))) {
         // Register with Apple / Google to receive push via APNS/FCM
 
         PushNotifications.register()
           .then(() => {}) // save the token server-side and use it to push notifications to this device
-          .catch(error => console.error('Error getting token', error));
+          .catch((error) => console.error('Error getting token', error));
 
         PushNotifications.addListener(
           'registration',
@@ -72,26 +67,26 @@ export class ArxisIonicFireStoreAuthService extends ArxisFireStoreAuthService {
     });
   }
 
-  setAuthState(): any {
+  setAuthState() {
     this.authState = this.afAuth.authState.pipe(
       switchMap(this.authFillAction.bind(this))
     );
   }
 
-  platformReady(user?: firebase.User) {
+  platformReady(user?: User) {
     return of(user);
   }
 
-  authFillAction(user: firebase.User): Observable<any> {
+  authFillAction(user: User | null): Observable<any> {
     return super.authFillAction(user).pipe(
       switchMap(this.platformReady.bind(this)),
-      switchMap(u => {
-        if (u) {
+      switchMap((u) => {
+        if (u && this.userFireStoreDoc) {
           this.userDevicesFCMDoc = this.userFireStoreDoc
             .collection('devices')
             .doc(this.routeFCMDoc || 'FCM');
           return of(u).pipe(
-            switchMap(async us => {
+            switchMap(async (us) => {
               if (
                 (await this.device.is('android')) ||
                 (await this.device.is('ios'))
@@ -115,8 +110,12 @@ export class ArxisIonicFireStoreAuthService extends ArxisFireStoreAuthService {
   }
 
   registerFCMToken(token?: string) {
+    if (!this.userDevicesFCMDoc) {
+      throw Error('this.userDevicesFCMDoc is undefined');
+    }
+
     return this.userDevicesFCMDoc.valueChanges().pipe(
-      map(res => {
+      map((res) => {
         let devicesFCM: Array<string>;
         if (res) {
           devicesFCM = res.devices || [];
@@ -127,6 +126,11 @@ export class ArxisIonicFireStoreAuthService extends ArxisFireStoreAuthService {
         if (devicesFCM.indexOf(newDevice) === -1) {
           if (newDevice) {
             devicesFCM.push(newDevice);
+
+            if (!this.userDevicesFCMDoc) {
+              throw Error('this.userDevicesFCMDoc is undefined');
+            }
+
             this.userDevicesFCMDoc.set(
               { devices: devicesFCM },
               { merge: true }
@@ -135,10 +139,5 @@ export class ArxisIonicFireStoreAuthService extends ArxisFireStoreAuthService {
         }
       })
     );
-  }
-
-  logout(): any {
-    const logout = super.logout();
-    return logout;
   }
 }

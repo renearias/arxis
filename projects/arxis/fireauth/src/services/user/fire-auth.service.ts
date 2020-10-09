@@ -1,31 +1,31 @@
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { UserAccountInterface } from '../../interfaces/user-account.interface';
-import * as firebase from 'firebase/app';
+import { auth, User } from 'firebase/app';
 import 'firebase/auth';
 import * as _ from 'lodash';
 import { Observable } from 'rxjs';
 import { ArxisAuthAbstractService } from './auth-abstract.service';
+import { cfaSignIn, cfaSignOut } from './facades';
 import {
-  cfaSignIn,
-  cfaSignOut,
   FacebookSignInResult,
   GoogleSignInResult,
   SignInResult,
 } from 'capacitor-firebase-auth/alternative';
 import { IProviderUserData } from '../../interfaces';
 import ProviderAuthException from '../../exceptions/provider-auth-exception';
+import { first } from 'rxjs/operators';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ArxisFireAuthService extends ArxisAuthAbstractService {
-  authState: Observable<any>;
+  authState: Observable<User | null>;
 
   constructor(public afAuth: AngularFireAuth) {
     // super(db, firebasePlugin, platform);
     super();
-    this.setAuthState();
+    this.authState = this.afAuth.authState;
     this.initUser();
   }
 
@@ -33,33 +33,29 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
    * Send a POST request to our login endpoint with the data
    * the user entered on the form.
    */
-  login(accountInfo: any) {
-    const seq = this.afAuth
-      .signInWithEmailAndPassword(accountInfo.email, accountInfo.password)
-      .then((res: firebase.auth.UserCredential) => {
-        return res.user;
-      });
+  async login<T extends { email: string; password: string }>(accountInfo: T) {
+    const seq = await this.afAuth.signInWithEmailAndPassword(
+      accountInfo.email,
+      accountInfo.password
+    );
 
-    seq
-      .then(res => {
-        this._loggedIn(res);
-        return this.currentUser;
-      })
-      .catch(error => {
-        console.error('ERROR EN LOGIN', error);
-      });
+    if (!seq.user) {
+      throw Error('No user');
+    }
 
-    return seq;
+    const user = seq.user as UserAccountInterface;
+
+    this._loggedIn(user);
+
+    return user;
   }
 
   loginWithCredential(
-    credential: firebase.auth.AuthCredential
-  ): Promise<firebase.auth.UserCredential> {
-    const promise: Promise<
-      firebase.auth.UserCredential
-    > = this.afAuth
+    credential: auth.AuthCredential
+  ): Promise<auth.UserCredential> {
+    const promise: Promise<auth.UserCredential> = this.afAuth
       .signInWithCredential(credential)
-      .then((userCredential: firebase.auth.UserCredential) => {
+      .then((userCredential: auth.UserCredential) => {
         return userCredential;
       });
     return promise;
@@ -70,14 +66,14 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
    * @deprecated loginWithFacebook()
    */
   loginFB() {
-    const provider = new firebase.auth.FacebookAuthProvider();
+    const provider = new auth.FacebookAuthProvider();
 
     return this.afAuth
       .signInWithPopup(provider)
-      .then(credential => {
+      .then((credential) => {
         return credential;
       })
-      .catch(error => {
+      .catch((error) => {
         throw error;
       });
   }
@@ -86,19 +82,19 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
    * Send a POST request to our signup endpoint with the data
    * the user entered on the form.
    */
-  signup(accountInfo: any) {
+  signup(accountInfo: { email: string; password: string }) {
     const seq = this.afAuth
       .createUserWithEmailAndPassword(accountInfo.email, accountInfo.password)
-      .then((res: firebase.auth.UserCredential) => {
+      .then((res: auth.UserCredential) => {
         return res.user;
       });
     seq
-      .then(newUser => {
+      .then((newUser) => {
         // this.preSavedAccountInfo=accountInfo;
-        this._loggedIn(newUser);
+        this._loggedIn(newUser as UserAccountInterface);
         return newUser;
       })
-      .catch(error => {
+      .catch((error) => {
         // Error; SMS not sent
         // ...
         console.error('ERROR', error);
@@ -111,7 +107,7 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
     try {
       const methods = await this.afAuth.fetchSignInMethodsForEmail(email);
       const hasPasswordMethod: boolean =
-        methods.findIndex(method => {
+        methods.findIndex((method) => {
           return method === 'password';
         }) !== -1;
 
@@ -128,69 +124,84 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
   /**
    * Check if user has provider
    */
-  hasProvider(user: firebase.User, providerId: string) {
+  hasProvider<T extends User>(user: T | null, providerId: string) {
     if (!user) {
       return false;
     }
-    const index = user.providerData.findIndex((provider: firebase.UserInfo) => {
-      return provider.providerId === providerId;
+
+    if (!user.providerData) {
+      console.warn('User sin providerData', JSON.stringify(user, null, 2));
+      return false;
+    }
+
+    const index = user.providerData.findIndex((userInfo) => {
+      return userInfo?.providerId === providerId;
     });
+
     return index !== -1;
   }
 
   createEmailCredential(email: string, password: string) {
-    return firebase.auth.EmailAuthProvider.credential(email, password);
+    return auth.EmailAuthProvider.credential(email, password);
   }
 
-  linkAccount(
-    credential: firebase.auth.AuthCredential
-  ): Promise<firebase.auth.UserCredential> {
+  linkAccount(credential: auth.AuthCredential): Promise<auth.UserCredential> {
     if (!this.currentUser) {
       return Promise.reject({ code: 'user-no-auth', message: 'user-no-auth' });
     }
     return this.currentUser.linkWithCredential(credential);
   }
 
+  /**
+   * @deprecated Usar currentUser.updateProfile()
+   */
   updateDisplayName(name: string) {
+    if (!this.currentUser) {
+      throw new Error('No authenticated user');
+    }
+
     return this.currentUser.updateProfile({
       displayName: name,
-      photoURL: this.currentUser.photoURL
+      photoURL: this.currentUser.photoURL,
     });
   }
 
+  /**
+   * @deprecated Usar currentUser.updatePassword()
+   */
   updateEmail(email: string) {
+    if (!this.currentUser) {
+      throw new Error('No authenticated user');
+    }
+
     return this.currentUser.updateEmail(email);
   }
 
+  /**
+   * @deprecated Usar currentUser.updatePassword()
+   */
   updatePassword(password: string) {
+    if (!this.currentUser) {
+      throw new Error('No authenticated user');
+    }
+
     return this.currentUser.updatePassword(password);
   }
 
   /**
-   * Log the user out, which forgets the session
+   * Call sign out method on native and web layers.
    */
-  logout(): Promise<void> {
-    const logout = this.afAuth.signOut();
-    logout
-      .then(() => {
-        // this.emptyUserData();
-        // this.readyState.next(false);
-        this.currentUser = undefined;
-      })
-      .catch(error => {
-        // An error happened.
-        console.log(error.message);
-      });
-    // this.firebasePlugin.unregister();
+  async logout(): Promise<void> {
+    await cfaSignOut();
 
-    return logout;
+    this.currentUser = null;
   }
 
   /**
    * Process a login/signup response to store user data
    */
-  _loggedIn(resp) {
-    this.currentUser = resp; // res.user en code movil
+  _loggedIn<T extends UserAccountInterface>(currentUser: T | null) {
+    this.currentUser = currentUser; // res.user en code movil
   }
 
   setAuthState() {
@@ -199,18 +210,16 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
 
   initUser() {
     return this.authState.subscribe(
-      (user: UserAccountInterface) => {
+      (user) => {
         if (user) {
-          this._loggedIn(user);
+          this._loggedIn(user as UserAccountInterface);
         }
       },
-      error => {
-        console.log('ocurrioun erooor', error);
+      (error) => {
+        console.log('ocurrioun error', error);
       }
     );
   }
-
-
 
   /**
    * Intenta iniciar sesión con el provider especificado de forma nativa y extenderlo a web.
@@ -221,20 +230,44 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
    *
    * @throws ProviderAuthException
    */
-  async loginWith(providerId: 'facebook.com' | 'google.com', allowIncompleteRegister = false) {
+  async loginWith(
+    providerId: 'facebook.com' | 'google.com',
+    allowIncompleteRegister = false
+  ) {
     try {
-      const { result, userCredential } = await cfaSignIn(providerId).toPromise();
-      const user = userCredential.user;
+      const { result, userCredential } = await cfaSignIn(providerId);
+      const user = userCredential.user as User;
+
+      console.log(
+        `cfaSignIn(${providerId}): `,
+        JSON.stringify({ result, userCredential }, null, 2)
+      );
+
+      console.log(
+        `this.hasProvider(user, 'password'): `,
+        JSON.stringify(this.hasProvider(user, 'password'), null, 2)
+      );
+
+      if (user.email) {
+        const methods = await this.afAuth.fetchSignInMethodsForEmail(
+          user.email
+        );
+
+        console.log(
+          `fetchSignInMethodsForEmail(${user.email}): `,
+          JSON.stringify(methods, null, 2)
+        );
+      }
 
       // Comprueba si el usuario no ha completado el registro si no se permite...
       if (!allowIncompleteRegister && !this.hasProvider(user, 'password')) {
         const data: IProviderUserData = {
-          email: user.email || undefined,
-          name: user.displayName || undefined,
-          phone: user.phoneNumber || undefined,
+          email: user?.email ?? undefined,
+          name: user?.displayName ?? undefined,
+          phone: user?.phoneNumber ?? undefined,
         };
 
-        await cfaSignOut().toPromise();
+        await cfaSignOut();
 
         await user.delete();
 
@@ -252,10 +285,22 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
         throw err;
       }
 
-      const { oauthAccessToken, message, email } = JSON.parse(JSON.stringify(err)) as { [i: string]: string | undefined};
+      console.log(`Falló algo antes: `, JSON.stringify(err, null, 2));
 
+      const { oauthAccessToken, message, email } = JSON.parse(
+        JSON.stringify(err)
+      ) as { [i: string]: string | undefined };
 
       let result: SignInResult | undefined;
+
+      if (email) {
+        const methods = await this.afAuth.fetchSignInMethodsForEmail(email);
+
+        console.log(
+          `fetchSignInMethodsForEmail(${email}): `,
+          JSON.stringify(methods, null, 2)
+        );
+      }
 
       if (oauthAccessToken) {
         switch (providerId) {
@@ -275,16 +320,15 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
 
       throw new ProviderAuthException(
         err.code,
-        message,
+        message || '',
         {
-          email
+          email,
         },
         result,
         err
       );
     }
   }
-
 
   /**
    * Intenta iniciar sesión con Facebook de forma nativa y extenderlo a web.
