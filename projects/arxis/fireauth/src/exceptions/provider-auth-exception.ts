@@ -1,36 +1,30 @@
 import {
-  SignInResult,
   FacebookSignInResult,
   GoogleSignInResult,
+  SignInResult,
   TwitterSignInResult,
 } from 'capacitor-firebase-auth';
-import { IProviderUserData } from '../interfaces';
 import { auth } from 'firebase/app';
-
 import 'firebase/auth';
+
+import { IProviderUserData } from '../interfaces';
+
+import Exception from './exception';
 
 /**
  * Error generado a partir del proceso de autenticación.
- *
- * @param code       Código.
- * @param message    Mensaje.
- * @param data       Infor del usuario.
- * @param result     SignInResult
- * @param innerError Referencia al error padre.
  */
-export default class ProviderAuthException extends Error {
+export default class ProviderAuthException extends Exception<
+  IProviderUserData
+> {
   constructor(
-    public readonly code: string,
+    code: string,
     message: string,
-    public readonly data: IProviderUserData = {},
+    data: IProviderUserData = {},
     public readonly result?: SignInResult,
-    public readonly innerError?: Error | any
+    innerError?: Error | any
   ) {
-    super(message);
-
-    // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
-    // https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-2.html#support-for-newtarget
-    Object.setPrototypeOf(this, new.target.prototype);
+    super({ code, message, data, innerError });
   }
 
   get credential(): firebase.auth.OAuthCredential | undefined {
