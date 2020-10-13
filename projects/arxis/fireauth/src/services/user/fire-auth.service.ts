@@ -1,20 +1,22 @@
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { UserAccountInterface } from '../../interfaces/user-account.interface';
-import { auth, User } from 'firebase/app';
-import 'firebase/auth';
-import * as _ from 'lodash';
-import { Observable } from 'rxjs';
-import { ArxisAuthAbstractService } from './auth-abstract.service';
-import { cfaSignIn, cfaSignOut } from './facades';
 import {
   FacebookSignInResult,
   GoogleSignInResult,
   SignInResult,
 } from 'capacitor-firebase-auth/alternative';
+import { User, auth } from 'firebase/app';
+import 'firebase/auth';
+import * as _ from 'lodash';
+import { Observable } from 'rxjs';
+
+import { NativeOnlySignInCredential } from '../../declarations';
+import { Exception, ProviderAuthException } from '../../exceptions';
 import { IProviderUserData } from '../../interfaces';
-import ProviderAuthException from '../../exceptions/provider-auth-exception';
-import { first } from 'rxjs/operators';
+import { UserAccountInterface } from '../../interfaces/user-account.interface';
+
+import { ArxisAuthAbstractService } from './auth-abstract.service';
+import { cfaSignIn, cfaSignOut } from './facades';
 
 @Injectable({
   providedIn: 'root',
@@ -121,8 +123,71 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
     }
   }
 
+  async fetchSignInMethodsForEmail(email: string) {
+    return await this.afAuth.fetchSignInMethodsForEmail(email);
+  }
+
+  async fetchSignInMethodsForUser<T extends User>(user: T) {
+    const { email } = user;
+
+    if (!email) {
+      throw new Exception('User has not email set');
+    }
+
+    return await this.afAuth.fetchSignInMethodsForEmail(email);
+  }
+
+  async fetchSignInMethodsForCurrentUser() {
+    if (!this.currentUser) {
+      throw new Exception('No authenticated user');
+    }
+
+    return await this.fetchSignInMethodsForUser(this.currentUser);
+  }
+
+  /**
+   *
+   * @param  signInMethod El método de inicio de sesión (ej auth.EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD)
+   */
+  async emailHasSignInMethod(
+    email: string,
+    signInMethod: string
+  ): Promise<boolean> {
+    const methods = await this.fetchSignInMethodsForEmail(email);
+
+    return methods.includes(signInMethod);
+  }
+
+  /**
+   *
+   * @param  signInMethod El método de inicio de sesión (ej auth.EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD)
+   */
+  async userHasSignInMethod<T extends User>(
+    user: T,
+    signInMethod: string
+  ): Promise<boolean> {
+    const methods = await this.fetchSignInMethodsForUser(user);
+
+    return methods.includes(signInMethod);
+  }
+
+  /**
+   *
+   * @param  signInMethod El método de inicio de sesión (ej auth.EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD)
+   */
+  async currentUserHasSignInMethod(signInMethod: string): Promise<boolean> {
+    if (!this.currentUser) {
+      throw new Exception('No authenticated user');
+    }
+
+    return await this.userHasSignInMethod(this.currentUser, signInMethod);
+  }
+
   /**
    * Check if user has provider
+   *
+   * @deprecated Usar más bien el método userHasSignInMethod(). No es correcto buscar por provider,
+   *   sino al método. Ya que, por ejemplo, el correo tiene contraseña y link. Ej.: auth.EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD
    */
   hasProvider<T extends User>(user: T | null, providerId: string) {
     if (!user) {
@@ -157,7 +222,7 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
    */
   updateDisplayName(name: string) {
     if (!this.currentUser) {
-      throw new Error('No authenticated user');
+      throw new Exception('No authenticated user');
     }
 
     return this.currentUser.updateProfile({
@@ -171,7 +236,7 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
    */
   updateEmail(email: string) {
     if (!this.currentUser) {
-      throw new Error('No authenticated user');
+      throw new Exception('No authenticated user');
     }
 
     return this.currentUser.updateEmail(email);
@@ -182,7 +247,7 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
    */
   updatePassword(password: string) {
     if (!this.currentUser) {
-      throw new Error('No authenticated user');
+      throw new Exception('No authenticated user');
     }
 
     return this.currentUser.updatePassword(password);
