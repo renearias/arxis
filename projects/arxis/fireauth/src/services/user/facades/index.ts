@@ -1,6 +1,4 @@
 import { Plugins } from '@capacitor/core';
-import { auth } from 'firebase/app';
-import 'firebase/auth';
 import {
   CapacitorFirebaseAuthPlugin,
   FacebookSignInResult,
@@ -10,25 +8,18 @@ import {
   SignInResult,
   TwitterSignInResult,
 } from 'capacitor-firebase-auth/dist/esm/definitions';
+import { auth } from 'firebase/app';
+import 'firebase/auth';
+
+import {
+  NativeOnlySignInCredential,
+  ProviderId,
+  SignInCredential,
+} from '../../../declarations';
+import { Exception } from '../../../exceptions';
 
 // @ts-ignore
 const plugin: CapacitorFirebaseAuthPlugin = Plugins.CapacitorFirebaseAuth;
-
-/**
- * Credenciales cuando se inicia sesión y se crea el usuario en Firebase.
- */
-export interface SignInCredential<T extends SignInResult> {
-  userCredential: auth.UserCredential;
-  result: T;
-}
-
-/**
- * Credenciales cuando sólo se inicia sesión en la capa nativa.
- */
-export interface NativeOnlySignInCredential<T extends SignInResult> {
-  credential: auth.OAuthCredential;
-  result: T;
-}
 
 /**
  * Contiene las facades para iniciar y cerrar sesión en las capas nativa y web.
