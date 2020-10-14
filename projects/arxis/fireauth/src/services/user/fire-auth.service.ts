@@ -123,21 +123,40 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
     }
   }
 
-  async fetchSignInMethodsForEmail(email: string) {
+  async fetchSignInMethodsForEmail(email: string): Promise<string[]> {
     return await this.afAuth.fetchSignInMethodsForEmail(email);
   }
 
-  async fetchSignInMethodsForUser<T extends User>(user: T) {
+  async fetchSignInMethodsForUser<T extends User>(user: T): Promise<string[]> {
     const { email } = user;
 
     if (!email) {
       throw new Exception('User has not email set');
     }
 
-    return await this.afAuth.fetchSignInMethodsForEmail(email);
+    const methods = await this.fetchSignInMethodsForEmail(email);
+
+    // 🐛 fetchSignInMethodsForEmail no se trae el método de teléfono,
+    // por eso hay que agregarlo manualmente si el usuario tiene la data
+    if (!methods.includes(auth.PhoneAuthProvider.PHONE_SIGN_IN_METHOD)) {
+      if (user.providerData) {
+        const phoneProvider = user.providerData.find((provider) => {
+          return (
+            provider &&
+            provider.providerId === auth.PhoneAuthProvider.PROVIDER_ID
+          );
+        });
+
+        if (phoneProvider) {
+          methods.push(auth.PhoneAuthProvider.PHONE_SIGN_IN_METHOD);
+        }
+      }
+    }
+
+    return methods;
   }
 
-  async fetchSignInMethodsForCurrentUser() {
+  async fetchSignInMethodsForCurrentUser(): Promise<string[]> {
     if (!this.currentUser) {
       throw new Exception('No authenticated user');
     }
