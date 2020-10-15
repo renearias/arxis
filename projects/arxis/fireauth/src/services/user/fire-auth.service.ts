@@ -229,11 +229,14 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
     return auth.EmailAuthProvider.credential(email, password);
   }
 
-  linkAccount(credential: auth.AuthCredential): Promise<auth.UserCredential> {
+  async linkAccount(
+    credential: auth.AuthCredential
+  ): Promise<auth.UserCredential> {
     if (!this.currentUser) {
-      return Promise.reject({ code: 'user-no-auth', message: 'user-no-auth' });
+      throw new Exception({ code: 'user-no-auth', message: 'user-no-auth' });
     }
-    return this.currentUser.linkWithCredential(credential);
+
+    return await this.currentUser.linkWithCredential(credential);
   }
 
   /**
