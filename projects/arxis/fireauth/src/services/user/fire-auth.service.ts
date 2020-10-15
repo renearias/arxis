@@ -10,7 +10,6 @@ import 'firebase/auth';
 import * as _ from 'lodash';
 import { Observable } from 'rxjs';
 
-import { NativeOnlySignInCredential } from '../../declarations';
 import { Exception, ProviderAuthException } from '../../exceptions';
 import { IProviderUserData } from '../../interfaces';
 import { UserAccountInterface } from '../../interfaces/user-account.interface';
@@ -110,6 +109,8 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
       const methods = await this.afAuth.fetchSignInMethodsForEmail(email);
       const hasPasswordMethod: boolean =
         methods.findIndex((method) => {
+          // FIXME: Usar la constante auth.EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD en vez de 'password'
+
           return method === 'password';
         }) !== -1;
 
@@ -311,9 +312,13 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
   /**
    * Intenta iniciar sesión con el provider especificado de forma nativa y extenderlo a web.
    *
-   * @param allowIncompleteRegister Indica si se mantiene la cuenta sin contraseña.
+   * @param allowIncompleteRegister Indica si se mantiene la cuenta aunque no haya verificado su teléfono o contraseña.
    *   Si es falso, disparará una ProviderAuthException ({ code: 'auth/unregistered' }) que contendrá las credenciales
    *   para enlazar con la cuenta completa luego.
+   *
+   * ### Known issues:
+   * - Al iniciar sesión con Google, la contraseña se reemplaza (elimina) si ya posee una cuenta de
+   *   google. Para evitar esto, se debe verificar el correo al momento del registro.
    *
    * @throws ProviderAuthException
    */
@@ -322,6 +327,14 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
     allowIncompleteRegister = false
   ) {
     try {
+      // let credentialResult = (await cfaSignIn(providerId, undefined, true));
+      //
+      // if (providerId === 'facebook.com') {
+      //   credentialResult = credentialResult as NativeOnlySignInCredential<FacebookSignInResult>;
+      // } else {
+      //   credentialResult = credentialResult as NativeOnlySignInCredential<GoogleSignInResult>;
+      // }
+
       const { result, userCredential } = await cfaSignIn(providerId);
       const user = userCredential.user as User;
 
@@ -330,24 +343,33 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
         JSON.stringify({ result, userCredential }, null, 2)
       );
 
+      let methods = await this.fetchSignInMethodsForUser(user);
+
       console.log(
-        `this.hasProvider(user, 'password'): `,
-        JSON.stringify(this.hasProvider(user, 'password'), null, 2)
+        `Antes del reload: fetchSignInMethodsForUser(${user.email}): `,
+        JSON.stringify(methods, null, 2)
       );
 
-      if (user.email) {
-        const methods = await this.afAuth.fetchSignInMethodsForEmail(
-          user.email
-        );
+      await user.reload();
 
-        console.log(
-          `fetchSignInMethodsForEmail(${user.email}): `,
-          JSON.stringify(methods, null, 2)
-        );
-      }
+      methods = await this.fetchSignInMethodsForUser(user);
+      console.log(
+        `Después del reload: fetchSignInMethodsForUser(${user.email}): `,
+        JSON.stringify(methods, null, 2)
+      );
 
-      // Comprueba si el usuario no ha completado el registro si no se permite...
-      if (!allowIncompleteRegister && !this.hasProvider(user, 'password')) {
+      // return user;
+
+      // if (auth().currentUser) {
+      //   auth().currentUser?.linkWithCredential()
+      // }
+
+      // Comprueba si el usuario no ha completado el registro con su teléfono, si no se permite...
+      if (
+        !allowIncompleteRegister &&
+        !methods.includes(auth.PhoneAuthProvider.PHONE_SIGN_IN_METHOD)
+      ) {
+        // TODO: Tener en cuenta cuando no tiene teléfono pero tiene su correo autenticado
         const data: IProviderUserData = {
           email: user?.email ?? undefined,
           name: user?.displayName ?? undefined,
@@ -356,10 +378,23 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
 
         await cfaSignOut();
 
-        await user.delete();
+        const onlyThisProvider = methods.length === 1;
+
+        // Sólo lo elimina si sólo contiene el provider con el que se está intentando crear la cuenta
+        if (onlyThisProvider) {
+          console.log('Eliminando cuenta');
+
+          await user.delete();
+        } else {
+          console.log('Unlink provider ' + result.providerId);
+          // Si tiene otro provider, sólo elimina este.
+          await user.unlink(result.providerId);
+        }
 
         throw new ProviderAuthException(
-          'auth/unregistered',
+          onlyThisProvider
+            ? 'auth/unregistered'
+            : 'auth/account-exists-with-different-credential',
           `User with email '${user.email}' has not completed its registration.`,
           data,
           result
@@ -374,14 +409,20 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
 
       console.log(`Falló algo antes: `, JSON.stringify(err, null, 2));
 
-      const { oauthAccessToken, message, email } = JSON.parse(
-        JSON.stringify(err)
-      ) as { [i: string]: string | undefined };
+      const {
+        oauthAccessToken,
+        message,
+        email,
+        displayName,
+        phoneNumber,
+      } = JSON.parse(JSON.stringify(err)) as {
+        [i: string]: string | undefined;
+      };
 
       let result: SignInResult | undefined;
 
       if (email) {
-        const methods = await this.afAuth.fetchSignInMethodsForEmail(email);
+        const methods = await this.fetchSignInMethodsForEmail(email);
 
         console.log(
           `fetchSignInMethodsForEmail(${email}): `,
@@ -410,6 +451,8 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
         message || '',
         {
           email,
+          name: displayName,
+          phone: phoneNumber,
         },
         result,
         err
