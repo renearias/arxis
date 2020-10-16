@@ -9,6 +9,7 @@ import { User, auth } from 'firebase/app';
 import 'firebase/auth';
 import * as _ from 'lodash';
 import { Observable } from 'rxjs';
+import { share } from 'rxjs/operators';
 
 import { Exception, ProviderAuthException } from '../../exceptions';
 import { IProviderUserData } from '../../interfaces';
@@ -23,10 +24,16 @@ import { cfaSignIn, cfaSignOut } from './facades';
 export class ArxisFireAuthService extends ArxisAuthAbstractService {
   authState: Observable<User | null>;
 
+  /**
+   * Shared current authenticated user.
+   */
+  readonly user$: Observable<User | null>;
+
   constructor(public afAuth: AngularFireAuth) {
     // super(db, firebasePlugin, platform);
     super();
     this.authState = this.afAuth.authState;
+    this.user$ = this.afAuth.user.pipe(share());
     this.initUser();
   }
 
