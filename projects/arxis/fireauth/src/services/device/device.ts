@@ -1,17 +1,16 @@
+import { Injectable } from '@angular/core';
 import {
-  Plugins,
   DeviceInfo,
-  PermissionType,
   PermissionResult,
+  PermissionType,
+  Plugins,
 } from '@capacitor/core';
 
 const { Device, PushNotifications, Permissions } = Plugins;
 
-import { Injectable } from '@angular/core';
-
 @Injectable({ providedIn: 'root' })
 export class ArxisDeviceService {
-  info: DeviceInfo;
+  info: DeviceInfo | undefined;
   constructor() {}
 
   async getInfo() {
@@ -21,15 +20,19 @@ export class ArxisDeviceService {
     return this.info;
   }
 
-  async is(type: string) {
+  async is(type: 'ios' | 'android' | 'electron' | 'web') {
     return (await this.getInfo()).platform === type;
   }
 
   async requestPushNotifications() {
-    if (!(PushNotifications as any).requestPermission) {
-      (PushNotifications as any).requestPermissions();
+    if (
+      !PushNotifications.requestPermission &&
+      PushNotifications.requestPermissions
+    ) {
+      await PushNotifications.requestPermissions(); // 💩 Why this?
     }
-    return (PushNotifications as any).requestPermission();
+
+    return await PushNotifications.requestPermission();
   }
 
   async hasPermissionNotifications(): Promise<PermissionResult> {
