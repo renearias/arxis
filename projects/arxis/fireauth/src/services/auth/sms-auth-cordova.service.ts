@@ -6,8 +6,12 @@ import { Platform } from '@ionic/angular';
 import * as firebase from 'firebase/app';
 import 'firebase/auth';
 import * as _ from 'lodash';
+
 import { ArxisSmsAuthInterface } from './sms-auth.interface';
 
+/**
+ * @deprecated
+ */
 @Injectable()
 export class ArxisSmsCordovaAuthService implements ArxisSmsAuthInterface {
   constructor(
@@ -16,7 +20,7 @@ export class ArxisSmsCordovaAuthService implements ArxisSmsAuthInterface {
     public platform: Platform
   ) {}
 
-  verificationId: string;
+  verificationId: string | undefined;
   confirmationResult: any;
   recaptchaVerifier: any;
 
@@ -141,7 +145,7 @@ export class ArxisSmsCordovaAuthService implements ArxisSmsAuthInterface {
     }
   }
 
-  sendSMSVerificationIOS(phone: string) {
+  sendSMSVerificationIOS(phone: string): Promise<string> {
     let awaitingSms = false;
     const seq = new Promise((resolve, reject) => {
       this.firebasePlugin
@@ -197,12 +201,12 @@ export class ArxisSmsCordovaAuthService implements ArxisSmsAuthInterface {
         });
     });
 
-    return seq;
+    return seq as Promise<string>;
   }
 
   confirm(
     code: string,
-    verificationId: string
+    verificationId?: string
   ): Promise<firebase.auth.AuthCredential> {
     const confirmedPromise: Promise<firebase.auth.AuthCredential> = new Promise(
       (resolve, reject) => {
@@ -214,6 +218,7 @@ export class ArxisSmsCordovaAuthService implements ArxisSmsAuthInterface {
         }
         if (!verificationId) {
           reject(new Error('Ups!'));
+          return;
         }
         const phoneCredential = firebase.auth.PhoneAuthProvider.credential(
           verificationId,
