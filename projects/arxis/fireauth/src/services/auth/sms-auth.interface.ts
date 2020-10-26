@@ -1,19 +1,19 @@
 import * as firebase from 'firebase/app';
 
-export class ArxisSmsAuthInterface {
-  verificationId: string;
+export interface ArxisSmsAuthInterface {
+  verificationId: string | undefined;
   confirmationResult: any;
   recaptchaVerifier: any;
 
-  sendSMSVerification: (
-    phone: any,
+  sendSMSVerification(
+    phone: string,
     verifier?: firebase.auth.RecaptchaVerifier
-  ) => Promise<string>;
+  ): Promise<string>;
 
-  sendSMSVerificationIOS: (phone: string) => any;
+  sendSMSVerificationIOS(phone: string): Promise<string>;
 
-  confirm: (
+  confirm(
     code: string,
     verificationId: string
-  ) => Promise<firebase.auth.AuthCredential>;
+  ): Promise<firebase.auth.AuthCredential>;
 }
