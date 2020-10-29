@@ -13,7 +13,7 @@ export abstract class ArxisAuthAbstractService
   );
 
   // tslint:disable-next-line:variable-name
-  private _registrationStatus$ = new BehaviorSubject<UserRegistrationStatus | null>(
+  private _registrationStatus$: BehaviorSubject<UserRegistrationStatus | null> = new BehaviorSubject<UserRegistrationStatus | null>(
     null
   );
 
@@ -27,18 +27,18 @@ export abstract class ArxisAuthAbstractService
   /**
    * Obtiene el estado del registro del usuario autenticado.
    */
-  get registrationStatus() {
+  get registrationStatus(): UserRegistrationStatus | null {
     return this.registrationStatus$.value;
   }
 
   /**
    * Obtiene o establece el usuario autenticado actual.
    */
-  get currentUser() {
+  get currentUser(): UserAccountInterface | null {
     return this.$user.value;
   }
 
-  set currentUser(user) {
+  set currentUser(user: UserAccountInterface | null) {
     this.$user.next(user);
 
     this.syncRegistrationStatus(); // Actualización asincrónica del registrationStatus$
