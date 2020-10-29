@@ -29,7 +29,7 @@ export class ArxisSmsAuthService implements ArxisSmsAuthInterface {
   recaptchaVerifier: auth.RecaptchaVerifier | undefined;
 
   async sendSMSVerification(
-    phone: any,
+    phone: string,
     verifier?: auth.RecaptchaVerifier
   ): Promise<string> {
     if (await this.platform.is('android')) {
@@ -65,6 +65,7 @@ export class ArxisSmsAuthService implements ArxisSmsAuthInterface {
             //   isEnabled: data.isEnabled || 'no data'
             // });
             console.log('data', data);
+
             if (data.state !== 'granted') {
               this.platform.requestPushNotifications().then((value) => {
                 // this.firebasePlugin.logEvent('userRequestPermissionIOS', {
@@ -94,7 +95,7 @@ export class ArxisSmsAuthService implements ArxisSmsAuthInterface {
           });
       });
 
-      return seq as Promise<any>;
+      return seq as Promise<string>;
     } else {
       this.recaptchaVerifier = verifier;
 
@@ -121,7 +122,7 @@ export class ArxisSmsAuthService implements ArxisSmsAuthInterface {
         return error;
       });
 
-      return seq as Promise<any>;
+      return seq;
     }
   }
 
