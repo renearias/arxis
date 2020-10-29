@@ -1,13 +1,12 @@
-import { Roles } from './roles';
 import { User } from 'firebase/app';
 
+import { Roles } from './roles';
+
 export interface UserAccountInterface extends User {
-  uid: string;
-  name: string;
-  email: string;
-  password: string;
+  name: string | null;
+  password?: string;
   profilePic?: string;
-  phone: string;
-  type: string;
+  phone: string | null;
+  type?: string;
   roles?: Roles;
 }

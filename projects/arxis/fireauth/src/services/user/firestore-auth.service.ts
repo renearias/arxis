@@ -4,13 +4,14 @@ import {
   AngularFirestore,
   AngularFirestoreDocument,
 } from '@angular/fire/firestore';
+import { User } from 'firebase/app';
 import 'firebase/auth';
 import * as _ from 'lodash';
 import { Observable, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
+
 import { ArxisFireAuthService } from './fire-auth.service';
-import { switchMap, map } from 'rxjs/operators';
 import { ArxisFirestoreAuthAbstractInterface } from './firestore-auth-abstract.interface';
-import { User } from 'firebase/app';
 
 @Injectable()
 export class ArxisFireStoreAuthService extends ArxisFireAuthService

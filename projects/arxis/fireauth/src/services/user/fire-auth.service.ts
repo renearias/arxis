@@ -71,7 +71,7 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
 
   /**
    *
-   * @deprecated loginWithFacebook()
+   * @deprecated Use loginWithFacebook() instead
    */
   loginFB() {
     const provider = new auth.FacebookAuthProvider();
@@ -306,9 +306,7 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
   initUser() {
     return this.authState.subscribe(
       (user) => {
-        if (user) {
-          this._loggedIn(user as UserAccountInterface);
-        }
+        this._loggedIn(user as UserAccountInterface);
       },
       (error) => {
         console.log('ocurrioun error', error);
@@ -470,7 +468,7 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
   /**
    * Intenta iniciar sesión con Facebook de forma nativa y extenderlo a web.
    *
-   * @param allowIncompleteRegister Indica si se mantiene la cuenta sin contraseña.
+   * @param allowNew Indica si se mantiene la cuenta sin contraseña.
    *   Si es falso, disparará una ProviderAuthException ({ code: 'auth/unregistered' }) que contendrá las credenciales
    *   para enlazar con la cuenta completa luego.
    *
@@ -483,7 +481,7 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
   /**
    * Intenta iniciar sesión con Google de forma nativa y extenderlo a web.
    *
-   * @param allowIncompleteRegister Indica si se mantiene la cuenta sin contraseña.
+   * @param allowNew Indica si se mantiene la cuenta sin contraseña.
    *   Si es falso, disparará una ProviderAuthException ({ code: 'auth/unregistered' }) que contendrá las credenciales
    *   para enlazar con la cuenta completa luego.
    *

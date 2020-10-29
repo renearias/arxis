@@ -1,18 +1,20 @@
-import { Injectable, InjectionToken, Inject, Optional } from '@angular/core';
+import { Inject, Injectable, InjectionToken, Optional } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
 import {
   AngularFirestore,
   AngularFirestoreDocument,
 } from '@angular/fire/firestore';
+import { Plugins, PushNotificationToken } from '@capacitor/core';
+import { Platform } from '@ionic/angular';
 import { User } from 'firebase/app';
 import 'firebase/auth';
 import * as _ from 'lodash';
-import { Observable, of, from, BehaviorSubject } from 'rxjs';
-import { switchMap, map } from 'rxjs/operators';
-import { ArxisFireStoreAuthService } from './firestore-auth.service';
-import { Platform } from '@ionic/angular';
+import { BehaviorSubject, Observable, from, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
+
 import { ArxisDeviceService } from '../device/device';
-import { Plugins, PushNotificationToken } from '@capacitor/core';
+
+import { ArxisFireStoreAuthService } from './firestore-auth.service';
 
 const { PushNotifications } = Plugins;
 

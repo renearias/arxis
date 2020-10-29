@@ -30,3 +30,42 @@ export interface NativeOnlySignInCredential<T extends SignInResult> {
   credential: auth.OAuthCredential;
   result: T;
 }
+
+/**
+ * Indica la info que ya tiene, o no, establecida el usuario.
+ */
+export interface UserRegistrationStatusData {
+  name?: boolean;
+  email?: boolean;
+  verifiedEmail?: boolean;
+
+  phone?: boolean;
+  password?: boolean;
+}
+
+/**
+ * Indica la info que ya tiene, o no, establecida el usuario.
+ *
+ * Si alguna info está pendiente, será undefined.
+ */
+export class UserRegistrationStatus implements UserRegistrationStatusData {
+  name: boolean | undefined;
+  email: boolean | undefined;
+  verifiedEmail: boolean | undefined;
+  password: boolean | undefined;
+  phone: boolean | undefined;
+
+  constructor({
+    name,
+    email,
+    password,
+    verifiedEmail,
+    phone,
+  }: UserRegistrationStatusData = {}) {
+    this.name = name;
+    this.email = email;
+    this.password = password;
+    this.verifiedEmail = verifiedEmail;
+    this.phone = phone;
+  }
+}
