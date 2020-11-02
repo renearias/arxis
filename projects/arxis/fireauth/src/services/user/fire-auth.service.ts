@@ -34,6 +34,12 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
     super();
     this.authState = this.afAuth.authState;
     this.user$ = this.afAuth.user.pipe(share());
+
+    // this.afAuth.onIdTokenChanged((user) => { // 💩 No funciona, en realidad no se dispara aunque se verifique email
+    //   console.log(`onIdTokenChanged(): UID: ${user?.uid}`); // 🚧 DEBUG
+    //   this.syncRegistrationStatus();
+    // });
+
     this.initUser();
   }
 
