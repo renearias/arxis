@@ -1,4 +1,4 @@
-import { SignInResult } from 'capacitor-firebase-auth/dist/esm/definitions';
+import { SignInResult } from 'capacitor-firebase-auth';
 import { auth } from 'firebase/app';
 
 export type FacebookProviderId = 'facebook.com';
