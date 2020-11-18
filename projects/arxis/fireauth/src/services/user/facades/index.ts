@@ -44,8 +44,11 @@ export class CapacitorFirebaseAuthFacades {
  * @param data The provider additional information (optional).
  * @param nativeOnly Only performs native sign-in.
  */
-export const cfaSignIn = async <TnativeOnly extends boolean = false>(
-  providerId: string,
+export const cfaSignIn = async <
+  TProviderId extends ProviderId,
+  TnativeOnly extends boolean = false
+>(
+  providerId: TProviderId,
   data?: SignInOptions,
   nativeOnly?: TnativeOnly
 ): Promise<
@@ -53,26 +56,21 @@ export const cfaSignIn = async <TnativeOnly extends boolean = false>(
     ? NativeOnlySignInCredential<SignInResult>
     : SignInCredential<SignInResult>
 > => {
-  const googleProvider = new auth.GoogleAuthProvider().providerId;
-  const facebookProvider = new auth.FacebookAuthProvider().providerId;
-  const twitterProvider = new auth.TwitterAuthProvider().providerId;
-  const phoneProvider = new auth.PhoneAuthProvider().providerId;
-
   switch (providerId) {
-    case googleProvider:
-      return cfaSignInGoogle(nativeOnly);
-    case twitterProvider:
-      return cfaSignInTwitter(nativeOnly);
-    case facebookProvider:
-      return cfaSignInFacebook(nativeOnly);
-    case phoneProvider:
+    case 'google.com':
+      return await cfaSignInGoogle(nativeOnly);
+    case 'twitter.com':
+      return await cfaSignInTwitter(nativeOnly);
+    case 'facebook.com':
+      return await cfaSignInFacebook(nativeOnly);
+    case 'phone':
       if (!data) {
-        throw new Error('No data defined for cfaSignInPhone');
+        throw new Exception('No data defined for cfaSignInPhone');
       }
 
-      return cfaSignInPhone(data.phone, data.verificationCode);
+      return await cfaSignInPhone(data.phone, data.verificationCode);
     default:
-      throw new Error(`Provider '${providerId}' is not supported`);
+      throw new Exception(`Provider '${providerId}' is not supported`);
   }
 };
 
@@ -101,6 +99,15 @@ export const cfaSignInGoogle = async <TnativeOnly extends boolean = false>(
 
   // create the credentials
   const credential = auth.GoogleAuthProvider.credential(result.idToken);
+
+  // console.log(
+  //   'cfaSignInGoogle: Native credential: ',
+  //   JSON.stringify(credential, null, 2)
+  // );
+  // console.log(
+  //   'cfaSignInGoogle: Native result: ',
+  //   JSON.stringify(result, null, 2)
+  // );
 
   const nativeCrendentials: NativeOnlySignInCredential<GoogleSignInResult> = {
     credential,
