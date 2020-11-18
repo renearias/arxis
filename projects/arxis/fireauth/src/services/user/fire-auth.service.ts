@@ -315,7 +315,7 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
         this._loggedIn(user as UserAccountInterface);
       },
       (error) => {
-        console.log('ocurrioun error', error);
+        console.error(error);
       }
     );
   }
@@ -349,25 +349,25 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
       const { result, userCredential } = await cfaSignIn(providerId);
       const user = userCredential.user as User;
 
-      console.log(
-        `cfaSignIn(${providerId}): `,
-        JSON.stringify({ result, userCredential }, null, 2)
-      );
+      // console.log(
+      //   `cfaSignIn(${providerId}): `,
+      //   JSON.stringify({ result, userCredential }, null, 2)
+      // );
 
       let methods = await this.fetchSignInMethodsForUser(user);
 
-      console.log(
-        `Antes del reload: fetchSignInMethodsForUser(${user.email}): `,
-        JSON.stringify(methods, null, 2)
-      );
+      // console.log(
+      //   `Antes del reload: fetchSignInMethodsForUser(${user.email}): `,
+      //   JSON.stringify(methods, null, 2)
+      // );
 
       await user.reload();
 
       methods = await this.fetchSignInMethodsForUser(user);
-      console.log(
-        `Después del reload: fetchSignInMethodsForUser(${user.email}): `,
-        JSON.stringify(methods, null, 2)
-      );
+      // console.log(
+      //   `Después del reload: fetchSignInMethodsForUser(${user.email}): `,
+      //   JSON.stringify(methods, null, 2)
+      // );
 
       // return user;
 
@@ -393,11 +393,11 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
 
         // Sólo lo elimina si sólo contiene el provider con el que se está intentando crear la cuenta
         if (onlyThisProvider) {
-          console.log('Eliminando cuenta');
+          // console.log('Eliminando cuenta');
 
           await user.delete();
         } else {
-          console.log('Unlink provider ' + result.providerId);
+          // console.log('Unlink provider ' + result.providerId);
           // Si tiene otro provider, sólo elimina este.
           await user.unlink(result.providerId);
         }
@@ -418,7 +418,7 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
         throw err;
       }
 
-      console.log(`Falló algo antes: `, JSON.stringify(err, null, 2));
+      // console.log(`Falló algo antes: `, JSON.stringify(err, null, 2));
 
       const {
         oauthAccessToken,
@@ -435,10 +435,10 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
       if (email) {
         const methods = await this.fetchSignInMethodsForEmail(email);
 
-        console.log(
-          `fetchSignInMethodsForEmail(${email}): `,
-          JSON.stringify(methods, null, 2)
-        );
+        // console.log(
+        //   `fetchSignInMethodsForEmail(${email}): `,
+        //   JSON.stringify(methods, null, 2)
+        // );
       }
 
       if (oauthAccessToken) {

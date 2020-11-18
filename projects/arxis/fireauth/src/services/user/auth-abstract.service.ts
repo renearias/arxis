@@ -80,7 +80,7 @@ export abstract class ArxisAuthAbstractService
     const user = this.currentUser;
 
     if (!user) {
-      console.log(this.constructor.name, null); // 🚧 DEBUG
+      // console.log(this.constructor.name, null); // 🚧 DEBUG
       this.registrationStatusSubject.next(null);
       return;
     }
@@ -108,7 +108,7 @@ export abstract class ArxisAuthAbstractService
       status.password = password;
     } // Si options.includeEmailLookups es true, entonces los campos que necesiten email van a ser undefined
 
-    console.log(this.constructor.name, status); // 🚧 DEBUG
+    // console.log(this.constructor.name, status); // 🚧 DEBUG
     this.registrationStatusSubject.next(status);
   }
 
