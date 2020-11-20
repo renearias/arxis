@@ -2,7 +2,6 @@ import { ModuleWithProviders, NgModule } from '@angular/core';
 import { AngularFireModule, FIREBASE_OPTIONS } from '@angular/fire';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
-import { FirebaseX } from '@ionic-native/firebase-x/ngx';
 import { IonicModule } from '@ionic/angular';
 import 'firebase/auth';
 import 'firebase/firestore';
@@ -33,7 +32,6 @@ export class ArxisFireAuthModule {
     return {
       ngModule: ArxisFireAuthModule,
       providers: [
-        FirebaseX,
         { provide: FIREBASE_OPTIONS, useValue: options },
         { provide: ROUTE_FCM_DOC, useValue: 'FCM' },
         ArxisFireAuthService,
