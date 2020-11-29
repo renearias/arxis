@@ -16,6 +16,8 @@ export interface SyncOptions {
    * (y que por lo tanto podrían exceder las quota de consulta).
    *
    * Por ejemplo, `password`.
+   *
+   * @deprecated Ahora la contraseña siempre estará disponible
    */
   includeEmailLookups?: boolean;
 }
@@ -53,7 +55,7 @@ export abstract class ArxisAuthAbstractService
   set currentUser(user: UserAccountInterface | null) {
     this.$user.next(user);
 
-    this.syncRegistrationStatus({ includeEmailLookups: true }); // Actualización asincrónica del registrationStatus$
+    this.syncRegistrationStatus({ includeEmailLookups: false }); // Actualización asincrónica del registrationStatus$
   }
 
   constructor() {
@@ -97,16 +99,30 @@ export abstract class ArxisAuthAbstractService
     if (!user.email) {
       // Poner a falso la info que necesita el correo
       status.password = false; // ⚡ Si no tiene correo, entonces sabemos que no tiene contraseña
-    } else if (options.includeEmailLookups) {
-      // Si tiene correo entonces se consulta si posee contraseña
-      const methods = await auth().fetchSignInMethodsForEmail(user.email);
+    } else {
+      if (options.includeEmailLookups) {
+        // ⚡ No necesita buscar por correo la contraseña
+        console.warn(
+          'Opción obsoleta: includeEmailLookups. Ahora se busca en el providerData'
+        );
+        // Si tiene correo entonces se consulta si posee contraseña
+        // const methods = await auth().fetchSignInMethodsForEmail(user.email); // 🐛 Como se consulta mucho, viola la quota de búsqueda
+        //
+        // const password = methods.includes(
+        //   auth.EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD
+        // );
+      }
 
-      const password = methods.includes(
-        auth.EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD
-      );
+      const password =
+        user.providerData.findIndex((info) => {
+          return (
+            info?.providerId ===
+            auth.EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD
+          );
+        }) >= 0;
 
       status.password = password;
-    } // Si options.includeEmailLookups es true, entonces los campos que necesiten email van a ser undefined
+    } // Si options.includeEmailLookups es false, entonces los campos que necesiten email van a ser undefined
 
     // console.log(this.constructor.name, status); // 🚧 DEBUG
     this.registrationStatusSubject.next(status);
