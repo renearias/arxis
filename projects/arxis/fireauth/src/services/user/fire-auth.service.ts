@@ -3,6 +3,7 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import {
   FacebookSignInResult,
   GoogleSignInResult,
+  SignInOptions,
   SignInResult,
 } from 'capacitor-firebase-auth/alternative';
 import { User, auth } from 'firebase/app';
@@ -11,6 +12,7 @@ import * as _ from 'lodash';
 import { Observable } from 'rxjs';
 import { share } from 'rxjs/operators';
 
+import { ProviderId } from '../../declarations';
 import { Exception, ProviderAuthException } from '../../exceptions';
 import { IProviderUserData } from '../../interfaces';
 import { UserAccountInterface } from '../../interfaces/user-account.interface';
@@ -334,8 +336,10 @@ export class ArxisFireAuthService extends ArxisAuthAbstractService {
    * @throws ProviderAuthException
    */
   async loginWith(
-    providerId: 'facebook.com' | 'google.com',
-    allowIncompleteRegister = false
+    providerId: ProviderId,
+    allowIncompleteRegister = false,
+    phoneData?: SignInOptions,
+    nativeOnly?: boolean
   ) {
     try {
       // let credentialResult = (await cfaSignIn(providerId, undefined, true));
