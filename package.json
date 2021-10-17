@@ -38,7 +38,7 @@
     "firebase": "^7.22.1",
     "lodash": "^4.17.20",
     "rxjs": "^6.6.3",
-    "tslib": "^1.10.0",
+    "tslib": "^2.0.0",
     "zone.js": "~0.10.2"
   },
   "devDependencies": {
@@ -64,5 +64,17 @@
     "ts-node": "~7.0.0",
     "tslint": "~5.15.0",
     "typescript": "~3.7.5"
-  }
+  },
+  "description": "[![time tracker](https://wakatime.com/badge/github/renearias/arxis.svg)](https://wakatime.com/badge/github/renearias/arxis)",
+  "main": "karma.conf.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/renearias/arxis.git"
+  },
+  "author": "Rene Arias <renearias@arxis.la>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/renearias/arxis/issues"
+  },
+  "homepage": "https://github.com/renearias/arxis#readme"
 }
