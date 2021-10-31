@@ -1,10 +1,10 @@
 import { Injectable, InjectionToken, Inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpParams } from '@angular/common/http';
 import { EndPointConfig } from './endpoint-config.interface';
+import { Observable } from 'rxjs';
 
-export const API_ENDPOINT_CONFIG: InjectionToken<
-  EndPointConfig
-> = new InjectionToken<EndPointConfig>('arxis.API_ENDPOINT_CONFIG');
+export const API_ENDPOINT_CONFIG: InjectionToken<EndPointConfig> =
+  new InjectionToken<EndPointConfig>('arxis.API_ENDPOINT_CONFIG');
 
 /**
  * Api is a generic REST Api handler. Set your API url first.
@@ -20,10 +20,14 @@ export class ApiService {
     this.url = this.endpoint.url;
   }
 
-  get(endpoint: string, params?: any, reqOpts?: any) {
+  get<T>(
+    endpoint: string,
+    params?: any,
+    reqOpts?: any
+  ): Observable<HttpEvent<T>> {
     if (!reqOpts) {
       reqOpts = {
-        params: new HttpParams()
+        params: new HttpParams(),
       };
     }
 
@@ -34,22 +38,30 @@ export class ApiService {
 
     console.log(reqOpts);
 
-    return this.http.get(this.url + '/' + endpoint, reqOpts);
+    return this.http.get<T>(this.url + '/' + endpoint, reqOpts);
   }
 
-  post(endpoint: string, body: any, reqOpts?: any) {
-    return this.http.post(this.url + '/' + endpoint, body, reqOpts);
+  post<T>(
+    endpoint: string,
+    body: any,
+    reqOpts?: any
+  ): Observable<HttpEvent<T>> {
+    return this.http.post<T>(this.url + '/' + endpoint, body, reqOpts);
   }
 
-  put(endpoint: string, body: any, reqOpts?: any) {
-    return this.http.put(this.url + '/' + endpoint, body, reqOpts);
+  put<T>(endpoint: string, body: any, reqOpts?: any): Observable<HttpEvent<T>> {
+    return this.http.put<T>(this.url + '/' + endpoint, body, reqOpts);
   }
 
-  delete(endpoint: string, reqOpts?: any) {
-    return this.http.delete(this.url + '/' + endpoint, reqOpts);
+  delete<T>(endpoint: string, reqOpts?: any): Observable<HttpEvent<T>> {
+    return this.http.delete<T>(this.url + '/' + endpoint, reqOpts);
   }
 
-  patch(endpoint: string, body: any, reqOpts?: any) {
-    return this.http.patch(this.url + '/' + endpoint, body, reqOpts);
+  patch<T>(
+    endpoint: string,
+    body: any,
+    reqOpts?: any
+  ): Observable<HttpEvent<T>> {
+    return this.http.patch<T>(this.url + '/' + endpoint, body, reqOpts);
   }
 }
