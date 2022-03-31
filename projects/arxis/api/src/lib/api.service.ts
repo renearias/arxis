@@ -1,23 +1,33 @@
 import { Injectable, InjectionToken, Inject } from '@angular/core';
-import { HttpClient, HttpEvent, HttpParams, HttpHeaders, HttpResponse } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpEvent,
+  HttpParams,
+  HttpHeaders,
+  HttpResponse,
+} from '@angular/common/http';
 import { EndPointConfig } from './endpoint-config.interface';
 import { Observable } from 'rxjs';
 
-export const API_ENDPOINT_CONFIG: InjectionToken<EndPointConfig> =
-  new InjectionToken<EndPointConfig>('arxis.API_ENDPOINT_CONFIG');
+export const API_ENDPOINT_CONFIG: InjectionToken<EndPointConfig> = new InjectionToken<
+  EndPointConfig
+>('arxis.API_ENDPOINT_CONFIG');
 
 export interface IRequestOptions {
-    headers?: HttpHeaders | {
+  headers?:
+    | HttpHeaders
+    | {
         [header: string]: string | string[];
-    };
-    params?: HttpParams | {
+      };
+  params?:
+    | HttpParams
+    | {
         [param: string]: string | string[];
-    };
-    reportProgress?: boolean;
-    withCredentials?: boolean;
-    responseType?: 'json';
+      };
+  reportProgress?: boolean;
+  withCredentials?: boolean;
+  responseType?: 'json';
 }
-
 
 export interface IEventsRequestOptions extends IRequestOptions {
   observe: 'events';
@@ -46,7 +56,6 @@ export class ApiService {
     this.url = this.endpoint.url;
   }
 
-
   /**
    * Constructs a `GET` request that interprets the body as a JSON object and returns the full event stream.
    *
@@ -57,8 +66,8 @@ export class ApiService {
    */
   get<T>(
     endpoint: string,
-    params?: any,
-    reqOpts?: IEventsRequestOptions
+    params: any | undefined | null,
+    reqOpts: IEventsRequestOptions
   ): Observable<HttpEvent<T>>;
 
   /**
@@ -70,8 +79,8 @@ export class ApiService {
    */
   get<T>(
     endpoint: string,
-    params?: any,
-    reqOpts?: IResponseRequestOptions
+    params: any | undefined | null,
+    reqOpts: IResponseRequestOptions
   ): Observable<HttpResponse<T>>;
 
   /**
@@ -88,9 +97,12 @@ export class ApiService {
 
   get<T>(
     endpoint: string,
-    params?: any,
-    reqOpts?: IResponseRequestOptions | IBodyRequestOptions | IEventsRequestOptions
-  ): Observable<HttpEvent<T>>|Observable<HttpResponse<T>>|Observable<T> {
+    params: any = undefined,
+    reqOpts?:
+      | IResponseRequestOptions
+      | IBodyRequestOptions
+      | IEventsRequestOptions
+  ): Observable<HttpEvent<T>> | Observable<HttpResponse<T>> | Observable<T> {
     if (!reqOpts) {
       reqOpts = {
         observe: 'body',
@@ -105,22 +117,22 @@ export class ApiService {
     }
 
     // console.log(reqOpts);
-    return this.http.get<T>(this.url + '/' + endpoint, reqOpts as IBodyRequestOptions);
+    return this.http.get<T>(
+      this.url + '/' + endpoint,
+      reqOpts as IBodyRequestOptions
+    );
   }
-
-
-
 
   post<T>(
     endpoint: string,
     body: any | null,
-    reqOpts?: IEventsRequestOptions
+    reqOpts: IEventsRequestOptions
   ): Observable<HttpEvent<T>>;
 
   post<T>(
     endpoint: string,
     body: any | null,
-    reqOpts?: IResponseRequestOptions
+    reqOpts: IResponseRequestOptions
   ): Observable<HttpResponse<T>>;
 
   /**
@@ -135,12 +147,14 @@ export class ApiService {
     reqOpts?: IBodyRequestOptions
   ): Observable<T>;
 
-
   post<T>(
     endpoint: string,
     body: any | null,
-    reqOpts?: IResponseRequestOptions | IBodyRequestOptions | IEventsRequestOptions
-  ): Observable<HttpEvent<T>>|Observable<HttpResponse<T>>|Observable<T> {
+    reqOpts?:
+      | IResponseRequestOptions
+      | IBodyRequestOptions
+      | IEventsRequestOptions
+  ): Observable<HttpEvent<T>> | Observable<HttpResponse<T>> | Observable<T> {
     if (!reqOpts) {
       reqOpts = {
         observe: 'body',
@@ -148,21 +162,23 @@ export class ApiService {
       };
     }
 
-    return this.http.post<T>(this.url + '/' + endpoint, body, reqOpts as IBodyRequestOptions);
+    return this.http.post<T>(
+      this.url + '/' + endpoint,
+      body,
+      reqOpts as IBodyRequestOptions
+    );
   }
-
-
 
   put<T>(
     endpoint: string,
     body: any | null,
-    reqOpts?: IEventsRequestOptions
+    reqOpts: IEventsRequestOptions
   ): Observable<HttpEvent<T>>;
 
   put<T>(
     endpoint: string,
     body: any | null,
-    reqOpts?: IResponseRequestOptions
+    reqOpts: IResponseRequestOptions
   ): Observable<HttpResponse<T>>;
 
   /**
@@ -177,25 +193,29 @@ export class ApiService {
     reqOpts?: IBodyRequestOptions
   ): Observable<T>;
 
-
   put<T>(
     endpoint: string,
     body: any | null,
-    reqOpts?: IResponseRequestOptions | IBodyRequestOptions | IEventsRequestOptions
-  ): Observable<HttpEvent<T>>|Observable<HttpResponse<T>>|Observable<T> {
-    return this.http.put<T>(this.url + '/' + endpoint, body, reqOpts as IBodyRequestOptions);
+    reqOpts?:
+      | IResponseRequestOptions
+      | IBodyRequestOptions
+      | IEventsRequestOptions
+  ): Observable<HttpEvent<T>> | Observable<HttpResponse<T>> | Observable<T> {
+    return this.http.put<T>(
+      this.url + '/' + endpoint,
+      body,
+      reqOpts as IBodyRequestOptions
+    );
   }
-
-
 
   delete<T>(
     endpoint: string,
-    reqOpts?: IEventsRequestOptions
+    reqOpts: IEventsRequestOptions
   ): Observable<HttpEvent<T>>;
 
   delete<T>(
     endpoint: string,
-    reqOpts?: IResponseRequestOptions
+    reqOpts: IResponseRequestOptions
   ): Observable<HttpResponse<T>>;
 
   /**
@@ -204,30 +224,31 @@ export class ApiService {
    *
    * @return An `Observable` of the `HTTPResponse`, with response body in the requested type.
    */
-  delete<T>(
-    endpoint: string,
-    reqOpts?: IBodyRequestOptions
-  ): Observable<T>;
+  delete<T>(endpoint: string, reqOpts?: IBodyRequestOptions): Observable<T>;
 
   delete<T>(
     endpoint: string,
-    reqOpts?: IResponseRequestOptions | IBodyRequestOptions | IEventsRequestOptions
-  ): Observable<HttpEvent<T>>|Observable<HttpResponse<T>>|Observable<T> {
-    return this.http.delete<T>(this.url + '/' + endpoint, reqOpts as IBodyRequestOptions);
+    reqOpts?:
+      | IResponseRequestOptions
+      | IBodyRequestOptions
+      | IEventsRequestOptions
+  ): Observable<HttpEvent<T>> | Observable<HttpResponse<T>> | Observable<T> {
+    return this.http.delete<T>(
+      this.url + '/' + endpoint,
+      reqOpts as IBodyRequestOptions
+    );
   }
-
-
 
   patch<T>(
     endpoint: string,
     body: any | null,
-    reqOpts?: IEventsRequestOptions
+    reqOpts: IEventsRequestOptions
   ): Observable<HttpEvent<T>>;
 
   patch<T>(
     endpoint: string,
     body: any | null,
-    reqOpts?: IResponseRequestOptions
+    reqOpts: IResponseRequestOptions
   ): Observable<HttpResponse<T>>;
 
   /**
@@ -246,8 +267,15 @@ export class ApiService {
   patch<T>(
     endpoint: string,
     body: any | null,
-    reqOpts?: IResponseRequestOptions | IBodyRequestOptions | IEventsRequestOptions
-  ): Observable<HttpEvent<T>>|Observable<HttpResponse<T>>|Observable<T> {
-    return this.http.patch<T>(this.url + '/' + endpoint, body, reqOpts as IBodyRequestOptions);
+    reqOpts?:
+      | IResponseRequestOptions
+      | IBodyRequestOptions
+      | IEventsRequestOptions
+  ): Observable<HttpEvent<T>> | Observable<HttpResponse<T>> | Observable<T> {
+    return this.http.patch<T>(
+      this.url + '/' + endpoint,
+      body,
+      reqOpts as IBodyRequestOptions
+    );
   }
 }
