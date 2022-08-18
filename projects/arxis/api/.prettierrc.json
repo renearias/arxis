@@ -1,0 +1,8 @@
+{
+  "singleQuote": true,
+  "importSort": {
+    ".js, .jsx, .ts, .tsx": {
+      "style": "typescript"
+    }
+  }
+}

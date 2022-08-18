@@ -1,0 +1,64 @@
+import { HttpHeaders, HttpParams } from '@angular/common/http';
+
+import {
+  IEventsRequestOptions,
+  HttpResponseType,
+  IResponseRequestOptions,
+  IBodyRequestOptions,
+} from './types';
+
+/**
+ * Genera un objeto HttpHeaders a partir de una entrada compatible.
+ */
+export const normalizeHeadersObject = (
+  headers?: HttpHeaders | Record<string, string | string[]>
+): HttpHeaders => {
+  if (!headers || headers instanceof HttpHeaders) {
+    headers = headers ?? new HttpHeaders();
+  } else {
+    headers = new HttpHeaders(headers);
+  }
+
+  return headers as HttpHeaders;
+};
+
+/**
+ * Genera un objeto HttpParams a partir de una entrada compatible.
+ */
+export const normalizeQueryParamsObject = (
+  params?: HttpParams | Record<string, string | string[]>
+): HttpParams => {
+  if (!params || params instanceof HttpParams) {
+    params = params ?? new HttpParams();
+  } else {
+    params = new HttpParams({ fromObject: params });
+  }
+
+  return params as HttpParams;
+};
+
+export const normalizeRequestOptions = <
+  TOptions extends
+    | IEventsRequestOptions<HttpResponseType>
+    | IResponseRequestOptions<HttpResponseType>
+    | IBodyRequestOptions<HttpResponseType>
+>(
+  reqOpts?: TOptions
+): TOptions => {
+  if (!reqOpts) {
+    reqOpts = ({
+      observe: 'body',
+      responseType: 'json',
+    } as IBodyRequestOptions<'json'>) as TOptions;
+  }
+
+  if (!reqOpts.observe) {
+    reqOpts.observe = 'body';
+  }
+
+  reqOpts.headers = normalizeHeadersObject(reqOpts.headers);
+
+  reqOpts.params = normalizeQueryParamsObject(reqOpts.params);
+
+  return reqOpts;
+};

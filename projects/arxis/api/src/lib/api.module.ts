@@ -1,4 +1,4 @@
-import { NgModule, ModuleWithProviders, Injector, Inject } from '@angular/core';
+import { NgModule, ModuleWithProviders } from '@angular/core';
 
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { ApiService, API_ENDPOINT_CONFIG } from './api.service';
@@ -11,13 +11,16 @@ export function _apiServiceFactory(endpoint: EndPointConfig, http: HttpClient) {
 @NgModule({
   declarations: [],
   imports: [HttpClientModule],
-  exports: []
+  exports: [],
 })
 export class ApiModule {
   static forRoot(enpoint: EndPointConfig): ModuleWithProviders<ApiModule> {
     return {
       ngModule: ApiModule,
-      providers: [{ provide: API_ENDPOINT_CONFIG, useValue: enpoint }, ApiService]
+      providers: [
+        { provide: API_ENDPOINT_CONFIG, useValue: enpoint },
+        ApiService,
+      ],
     };
   }
 }

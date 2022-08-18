@@ -3,43 +3,22 @@ import {
   HttpClient,
   HttpEvent,
   HttpParams,
-  HttpHeaders,
   HttpResponse,
 } from '@angular/common/http';
 import { EndPointConfig } from './endpoint-config.interface';
 import { Observable } from 'rxjs';
+import {
+  HttpResponseType,
+  IBodyRequestOptions,
+  IResponseRequestOptions,
+  HttpMethod,
+  IEventsRequestOptions,
+} from './types';
+import { normalizeQueryParamsObject, normalizeRequestOptions } from './helpers';
 
 export const API_ENDPOINT_CONFIG: InjectionToken<EndPointConfig> = new InjectionToken<
   EndPointConfig
 >('arxis.API_ENDPOINT_CONFIG');
-
-export interface IRequestOptions {
-  headers?:
-    | HttpHeaders
-    | {
-        [header: string]: string | string[];
-      };
-  params?:
-    | HttpParams
-    | {
-        [param: string]: string | string[];
-      };
-  reportProgress?: boolean;
-  withCredentials?: boolean;
-  responseType?: 'json';
-}
-
-export interface IEventsRequestOptions extends IRequestOptions {
-  observe: 'events';
-}
-
-export interface IResponseRequestOptions extends IRequestOptions {
-  observe: 'response';
-}
-
-export interface IBodyRequestOptions extends IRequestOptions {
-  observe: 'body';
-}
 
 /**
  * Api is a generic REST Api handler. Set your API url first.
@@ -57,18 +36,35 @@ export class ApiService {
   }
 
   /**
-   * Constructs a `GET` request that interprets the body as a JSON object and returns the full event stream.
+   * This methods run BEFORE each request, but after taking request info.
    *
-   * @param url     The endpoint URL.
-   * @param options The HTTP options to send with the request.
+   * Useful to read headers and params on inject global values before sending the actual request.
    *
-   * @return An `Observable` of the response, with a response body in the requested type.
+   */
+  protected onRequesting<
+    TOptions extends
+      | IBodyRequestOptions<HttpResponseType>
+      | IResponseRequestOptions<HttpResponseType>
+      | IEventsRequestOptions<HttpResponseType>
+  >(method: HttpMethod, options: TOptions): TOptions {
+    return options;
+  }
+
+  // =======================================================================================================================================
+  // GET
+
+  // TODO: Restringir el T según el tipo de respuesta
+  /**
+   * Constructs a `GET` request that interprets the body as, by default, a JSON object and returns
+   * the response body in a given type.
+   *
+   * @return An `Observable` of the `HTTPResponse`, with a response body in the requested type.
    */
   get<T>(
     endpoint: string,
-    params: any | undefined | null,
-    reqOpts: IEventsRequestOptions
-  ): Observable<HttpEvent<T>>;
+    params?: HttpParams | Record<string, string | string[]> | null,
+    reqOpts?: IBodyRequestOptions<HttpResponseType>
+  ): Observable<T>;
 
   /**
    * Constructs a `GET` request that interprets the body as a JSON object and
@@ -79,107 +75,91 @@ export class ApiService {
    */
   get<T>(
     endpoint: string,
-    params: any | undefined | null,
-    reqOpts: IResponseRequestOptions
+    params: HttpParams | Record<string, string | string[]> | null,
+    reqOpts: IResponseRequestOptions<HttpResponseType>
   ): Observable<HttpResponse<T>>;
 
   /**
-   * Constructs a `GET` request that interprets the body as a JSON object and returns
-   * the response body in a given type.
+   * Constructs a `GET` request that interprets the body as a JSON object and returns the full event stream.
    *
-   * @return An `Observable` of the `HTTPResponse`, with a response body in the requested type.
+   * @param url     The endpoint URL.
+   * @param options The HTTP options to send with the request.
+   *
+   * @return An `Observable` of the response, with a response body in the requested type.
    */
   get<T>(
     endpoint: string,
-    params?: any,
-    reqOpts?: IBodyRequestOptions
-  ): Observable<T>;
+    params: HttpParams | Record<string, string | string[]> | null,
+    reqOpts: IEventsRequestOptions<HttpResponseType>
+  ): Observable<HttpEvent<T>>;
+
+  // ---------------------------------------------------------------------------------------------------------------------------------------
 
   get<T>(
     endpoint: string,
-    params: any = undefined,
+    params?: HttpParams | Record<string, string | string[]> | null,
     reqOpts?:
-      | IResponseRequestOptions
-      | IBodyRequestOptions
-      | IEventsRequestOptions
+      | IEventsRequestOptions<HttpResponseType>
+      | IResponseRequestOptions<HttpResponseType>
+      | IBodyRequestOptions<HttpResponseType>
   ): Observable<HttpEvent<T>> | Observable<HttpResponse<T>> | Observable<T> {
-    if (!reqOpts) {
-      reqOpts = {
-        observe: 'body',
-        responseType: 'json',
-        params: new HttpParams(),
-      } as IBodyRequestOptions;
+    reqOpts = normalizeRequestOptions(reqOpts);
+
+    if (!!params) {
+      reqOpts.params = normalizeQueryParamsObject(params);
     }
 
-    // Support easy query params for GET requests
-    if (params) {
-      reqOpts.params = new HttpParams({ fromObject: params });
-    }
+    reqOpts = this.onRequesting('GET', reqOpts);
 
     // console.log(reqOpts);
     return this.http.get<T>(
       this.url + '/' + endpoint,
-      reqOpts as IBodyRequestOptions
+      reqOpts as IBodyRequestOptions<'json'>
     );
   }
 
-  post<T>(
-    endpoint: string,
-    body: any | null,
-    reqOpts: IEventsRequestOptions
-  ): Observable<HttpEvent<T>>;
-
-  post<T>(
-    endpoint: string,
-    body: any | null,
-    reqOpts: IResponseRequestOptions
-  ): Observable<HttpResponse<T>>;
-
+  // =======================================================================================================================================
   /**
-   * Constructs a `POST` request that interprets the body as a JSON object
-   * and returns an observable of the response.
+   * Constructs a `POST` request and returns an observable of the infered response type (by default, 'JSON').
    *
    * @return  An `Observable` of the `HTTPResponse` for the request, with a response body in the requested type.
    */
   post<T>(
     endpoint: string,
     body: any | null,
-    reqOpts?: IBodyRequestOptions
+    reqOpts?: IBodyRequestOptions<HttpResponseType>
   ): Observable<T>;
 
   post<T>(
     endpoint: string,
     body: any | null,
+    reqOpts: IResponseRequestOptions<HttpResponseType>
+  ): Observable<HttpResponse<T>>;
+
+  post<T>(
+    endpoint: string,
+    body: any | null,
+    reqOpts: IEventsRequestOptions<HttpResponseType>
+  ): Observable<HttpEvent<T>>;
+
+  post<T>(
+    endpoint: string,
+    body: any | null,
     reqOpts?:
-      | IResponseRequestOptions
-      | IBodyRequestOptions
-      | IEventsRequestOptions
+      | IEventsRequestOptions<HttpResponseType>
+      | IResponseRequestOptions<HttpResponseType>
+      | IBodyRequestOptions<HttpResponseType>
   ): Observable<HttpEvent<T>> | Observable<HttpResponse<T>> | Observable<T> {
-    if (!reqOpts) {
-      reqOpts = {
-        observe: 'body',
-        responseType: 'json',
-      };
-    }
+    reqOpts = this.onRequesting('POST', normalizeRequestOptions(reqOpts));
 
     return this.http.post<T>(
       this.url + '/' + endpoint,
       body,
-      reqOpts as IBodyRequestOptions
+      reqOpts as IBodyRequestOptions<'json'>
     );
   }
 
-  put<T>(
-    endpoint: string,
-    body: any | null,
-    reqOpts: IEventsRequestOptions
-  ): Observable<HttpEvent<T>>;
-
-  put<T>(
-    endpoint: string,
-    body: any | null,
-    reqOpts: IResponseRequestOptions
-  ): Observable<HttpResponse<T>>;
+  // =======================================================================================================================================
 
   /**
    * Constructs a `PUT` request that interprets the body as a JSON object
@@ -190,32 +170,46 @@ export class ApiService {
   put<T>(
     endpoint: string,
     body: any | null,
-    reqOpts?: IBodyRequestOptions
+    reqOpts?: IBodyRequestOptions<HttpResponseType>
   ): Observable<T>;
+
+  put<T, TResponseType extends HttpResponseType>(
+    endpoint: string,
+    body: any | null,
+    reqOpts: IEventsRequestOptions<TResponseType>
+  ): Observable<HttpEvent<T>>;
+
+  put<T, TResponseType extends HttpResponseType>(
+    endpoint: string,
+    body: any | null,
+    reqOpts: IResponseRequestOptions<TResponseType>
+  ): Observable<HttpResponse<T>>;
 
   put<T>(
     endpoint: string,
     body: any | null,
     reqOpts?:
-      | IResponseRequestOptions
-      | IBodyRequestOptions
-      | IEventsRequestOptions
+      | IEventsRequestOptions<HttpResponseType>
+      | IResponseRequestOptions<HttpResponseType>
+      | IBodyRequestOptions<HttpResponseType>
   ): Observable<HttpEvent<T>> | Observable<HttpResponse<T>> | Observable<T> {
+    reqOpts = this.onRequesting('PUT', normalizeRequestOptions(reqOpts));
+
     return this.http.put<T>(
       this.url + '/' + endpoint,
       body,
-      reqOpts as IBodyRequestOptions
+      reqOpts as IBodyRequestOptions<'json'>
     );
   }
 
   delete<T>(
     endpoint: string,
-    reqOpts: IEventsRequestOptions
+    reqOpts: IEventsRequestOptions<HttpResponseType>
   ): Observable<HttpEvent<T>>;
 
   delete<T>(
     endpoint: string,
-    reqOpts: IResponseRequestOptions
+    reqOpts: IResponseRequestOptions<HttpResponseType>
   ): Observable<HttpResponse<T>>;
 
   /**
@@ -224,32 +218,25 @@ export class ApiService {
    *
    * @return An `Observable` of the `HTTPResponse`, with response body in the requested type.
    */
-  delete<T>(endpoint: string, reqOpts?: IBodyRequestOptions): Observable<T>;
+  delete<T>(
+    endpoint: string,
+    reqOpts?: IBodyRequestOptions<HttpResponseType>
+  ): Observable<T>;
 
   delete<T>(
     endpoint: string,
     reqOpts?:
-      | IResponseRequestOptions
-      | IBodyRequestOptions
-      | IEventsRequestOptions
+      | IEventsRequestOptions<HttpResponseType>
+      | IResponseRequestOptions<HttpResponseType>
+      | IBodyRequestOptions<HttpResponseType>
   ): Observable<HttpEvent<T>> | Observable<HttpResponse<T>> | Observable<T> {
+    reqOpts = this.onRequesting('DELETE', normalizeRequestOptions(reqOpts));
+
     return this.http.delete<T>(
       this.url + '/' + endpoint,
-      reqOpts as IBodyRequestOptions
+      reqOpts as IBodyRequestOptions<'json'>
     );
   }
-
-  patch<T>(
-    endpoint: string,
-    body: any | null,
-    reqOpts: IEventsRequestOptions
-  ): Observable<HttpEvent<T>>;
-
-  patch<T>(
-    endpoint: string,
-    body: any | null,
-    reqOpts: IResponseRequestOptions
-  ): Observable<HttpResponse<T>>;
 
   /**
    * Constructs a `PATCH` request that interprets the body as a JSON object
@@ -261,21 +248,35 @@ export class ApiService {
   patch<T>(
     endpoint: string,
     body: any | null,
-    reqOpts?: IBodyRequestOptions
+    reqOpts?: IBodyRequestOptions<HttpResponseType>
   ): Observable<T>;
 
   patch<T>(
     endpoint: string,
     body: any | null,
+    reqOpts: IResponseRequestOptions<HttpResponseType>
+  ): Observable<HttpResponse<T>>;
+
+  patch<T>(
+    endpoint: string,
+    body: any | null,
+    reqOpts: IEventsRequestOptions<HttpResponseType>
+  ): Observable<HttpEvent<T>>;
+
+  patch<T>(
+    endpoint: string,
+    body: any | null,
     reqOpts?:
-      | IResponseRequestOptions
-      | IBodyRequestOptions
-      | IEventsRequestOptions
+      | IBodyRequestOptions<HttpResponseType>
+      | IResponseRequestOptions<HttpResponseType>
+      | IEventsRequestOptions<HttpResponseType>
   ): Observable<HttpEvent<T>> | Observable<HttpResponse<T>> | Observable<T> {
+    reqOpts = this.onRequesting('PATCH', normalizeRequestOptions(reqOpts));
+
     return this.http.patch<T>(
       this.url + '/' + endpoint,
       body,
-      reqOpts as IBodyRequestOptions
+      reqOpts as IBodyRequestOptions<'json'>
     );
   }
 }

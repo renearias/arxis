@@ -131,13 +131,13 @@
           "options": {
             "tsConfig": "projects/arxis/fireauth/tsconfig.lib.json",
             "project": "projects/arxis/fireauth/ng-package.json"
-          }
-        ,          "configurations": {
+          },
+          "configurations": {
             "production": {
               "tsConfig": "projects/arxis/fireauth/tsconfig.lib.prod.json"
             }
           }
-},
+        },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
@@ -171,13 +171,13 @@
           "options": {
             "tsConfig": "projects/arxis/api/tsconfig.lib.json",
             "project": "projects/arxis/api/ng-package.json"
-          }
-        ,          "configurations": {
+          },
+          "configurations": {
             "production": {
               "tsConfig": "projects/arxis/api/tsconfig.lib.prod.json"
             }
           }
-},
+        },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
@@ -241,5 +241,8 @@
       }
     }
   },
-  "defaultProject": "arxis"
+  "defaultProject": "arxis",
+  "cli": {
+    "analytics": false
+  }
 }
