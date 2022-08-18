@@ -4,6 +4,7 @@ import {
   HttpEvent,
   HttpParams,
   HttpResponse,
+  HttpHeaders,
 } from '@angular/common/http';
 import { EndPointConfig } from './endpoint-config.interface';
 import { Observable } from 'rxjs';
@@ -13,6 +14,8 @@ import {
   IResponseRequestOptions,
   HttpMethod,
   IEventsRequestOptions,
+  INormalizedRequestOptions,
+  IAnyRequestOptions,
 } from './types';
 import { normalizeQueryParamsObject, normalizeRequestOptions } from './helpers';
 
@@ -26,27 +29,35 @@ export const API_ENDPOINT_CONFIG: InjectionToken<EndPointConfig> = new Injection
 // @dynamic
 @Injectable()
 export class ApiService {
-  url: string;
+  public readonly url: string;
+  protected readonly globalHeaders: Record<string, string | string[]> = {};
 
   constructor(
     @Inject(API_ENDPOINT_CONFIG) private endpoint: EndPointConfig,
     public http: HttpClient
   ) {
     this.url = this.endpoint.url;
+    this.globalHeaders = this.endpoint.globalHeaders ?? {};
   }
 
   /**
-   * This methods run BEFORE each request, but after taking request info.
+   * This method is called just BEFORE each request, but after taking request info.
    *
    * Useful to read headers and params on inject global values before sending the actual request.
    *
    */
-  protected onRequesting<
-    TOptions extends
-      | IBodyRequestOptions<HttpResponseType>
-      | IResponseRequestOptions<HttpResponseType>
-      | IEventsRequestOptions<HttpResponseType>
-  >(method: HttpMethod, options: TOptions): TOptions {
+  protected onRequesting<TOptions extends IAnyRequestOptions<HttpResponseType>>(
+    method: HttpMethod,
+    options: INormalizedRequestOptions<TOptions>
+  ): INormalizedRequestOptions<TOptions> {
+    Object.keys(this.globalHeaders).forEach((key) => {
+      const value = this.globalHeaders[key];
+
+      if (!!key && !!value) {
+        options.headers = options.headers.append(key, this.globalHeaders[key]);
+      }
+    });
+
     return options;
   }
 
@@ -95,21 +106,18 @@ export class ApiService {
 
   // ---------------------------------------------------------------------------------------------------------------------------------------
 
-  get<T>(
+  get<T, TOption extends IAnyRequestOptions<HttpResponseType>>(
     endpoint: string,
     params?: HttpParams | Record<string, string | string[]> | null,
-    reqOpts?:
-      | IEventsRequestOptions<HttpResponseType>
-      | IResponseRequestOptions<HttpResponseType>
-      | IBodyRequestOptions<HttpResponseType>
+    reqOpts?: TOption
   ): Observable<HttpEvent<T>> | Observable<HttpResponse<T>> | Observable<T> {
-    reqOpts = normalizeRequestOptions(reqOpts);
+    let options = normalizeRequestOptions(reqOpts);
 
     if (!!params) {
-      reqOpts.params = normalizeQueryParamsObject(params);
+      options.params = normalizeQueryParamsObject(params);
     }
 
-    reqOpts = this.onRequesting('GET', reqOpts);
+    options = this.onRequesting('GET', options);
 
     // console.log(reqOpts);
     return this.http.get<T>(

@@ -1,10 +1,10 @@
 import { HttpHeaders, HttpParams } from '@angular/common/http';
 
 import {
-  IEventsRequestOptions,
   HttpResponseType,
-  IResponseRequestOptions,
   IBodyRequestOptions,
+  INormalizedRequestOptions,
+  IAnyRequestOptions,
 } from './types';
 
 /**
@@ -26,7 +26,7 @@ export const normalizeHeadersObject = (
  * Genera un objeto HttpParams a partir de una entrada compatible.
  */
 export const normalizeQueryParamsObject = (
-  params?: HttpParams | Record<string, string | string[]>
+  params: HttpParams | Record<string, string | string[]> | undefined
 ): HttpParams => {
   if (!params || params instanceof HttpParams) {
     params = params ?? new HttpParams();
@@ -38,13 +38,10 @@ export const normalizeQueryParamsObject = (
 };
 
 export const normalizeRequestOptions = <
-  TOptions extends
-    | IEventsRequestOptions<HttpResponseType>
-    | IResponseRequestOptions<HttpResponseType>
-    | IBodyRequestOptions<HttpResponseType>
+  TOptions extends IAnyRequestOptions<HttpResponseType>
 >(
-  reqOpts?: TOptions
-): TOptions => {
+  reqOpts: TOptions | undefined
+): INormalizedRequestOptions<TOptions> => {
   if (!reqOpts) {
     reqOpts = ({
       observe: 'body',
@@ -60,5 +57,5 @@ export const normalizeRequestOptions = <
 
   reqOpts.params = normalizeQueryParamsObject(reqOpts.params);
 
-  return reqOpts;
+  return reqOpts as INormalizedRequestOptions<TOptions>;
 };

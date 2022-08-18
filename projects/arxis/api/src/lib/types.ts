@@ -44,6 +44,21 @@ export interface IBodyRequestOptions<T extends HttpResponseType>
   observe?: 'body';
 }
 
+export type IAnyRequestOptions<T extends HttpResponseType> =
+  | IEventsRequestOptions<T>
+  | IResponseRequestOptions<T>
+  | IBodyRequestOptions<T>;
+
+/**
+ * Optiones de la request, pero con el headers y params definidos.
+ */
+export type INormalizedRequestOptions<
+  TOptions extends IAnyRequestOptions<HttpResponseType>
+> = Omit<TOptions, 'headers' | 'params'> & {
+  headers: HttpHeaders;
+  params: HttpParams;
+};
+
 // export type IAnyBodyRequestOptions =
 //   | IBodyRequestOptions<'arraybuffer'>
 //   | IBodyRequestOptions<'blob'>
