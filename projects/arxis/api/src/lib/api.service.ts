@@ -4,7 +4,6 @@ import {
   HttpEvent,
   HttpParams,
   HttpResponse,
-  HttpHeaders,
 } from '@angular/common/http';
 import { EndPointConfig } from './endpoint-config.interface';
 import { Observable } from 'rxjs';
@@ -106,18 +105,18 @@ export class ApiService {
 
   // ---------------------------------------------------------------------------------------------------------------------------------------
 
-  get<T, TOption extends IAnyRequestOptions<HttpResponseType>>(
+  get<T>(
     endpoint: string,
     params?: HttpParams | Record<string, string | string[]> | null,
-    reqOpts?: TOption
+    reqOpts?: IAnyRequestOptions<HttpResponseType>
   ): Observable<HttpEvent<T>> | Observable<HttpResponse<T>> | Observable<T> {
-    let options = normalizeRequestOptions(reqOpts);
+    reqOpts = normalizeRequestOptions(reqOpts);
 
     if (!!params) {
-      options.params = normalizeQueryParamsObject(params);
+      reqOpts.params = normalizeQueryParamsObject(params);
     }
 
-    options = this.onRequesting('GET', options);
+    reqOpts = this.onRequesting('GET', normalizeRequestOptions(reqOpts));
 
     // console.log(reqOpts);
     return this.http.get<T>(
@@ -153,10 +152,7 @@ export class ApiService {
   post<T>(
     endpoint: string,
     body: any | null,
-    reqOpts?:
-      | IEventsRequestOptions<HttpResponseType>
-      | IResponseRequestOptions<HttpResponseType>
-      | IBodyRequestOptions<HttpResponseType>
+    reqOpts?: IAnyRequestOptions<HttpResponseType>
   ): Observable<HttpEvent<T>> | Observable<HttpResponse<T>> | Observable<T> {
     reqOpts = this.onRequesting('POST', normalizeRequestOptions(reqOpts));
 
@@ -196,10 +192,7 @@ export class ApiService {
   put<T>(
     endpoint: string,
     body: any | null,
-    reqOpts?:
-      | IEventsRequestOptions<HttpResponseType>
-      | IResponseRequestOptions<HttpResponseType>
-      | IBodyRequestOptions<HttpResponseType>
+    reqOpts?: IAnyRequestOptions<HttpResponseType>
   ): Observable<HttpEvent<T>> | Observable<HttpResponse<T>> | Observable<T> {
     reqOpts = this.onRequesting('PUT', normalizeRequestOptions(reqOpts));
 
@@ -233,10 +226,7 @@ export class ApiService {
 
   delete<T>(
     endpoint: string,
-    reqOpts?:
-      | IEventsRequestOptions<HttpResponseType>
-      | IResponseRequestOptions<HttpResponseType>
-      | IBodyRequestOptions<HttpResponseType>
+    reqOpts?: IAnyRequestOptions<HttpResponseType>
   ): Observable<HttpEvent<T>> | Observable<HttpResponse<T>> | Observable<T> {
     reqOpts = this.onRequesting('DELETE', normalizeRequestOptions(reqOpts));
 
@@ -274,10 +264,7 @@ export class ApiService {
   patch<T>(
     endpoint: string,
     body: any | null,
-    reqOpts?:
-      | IBodyRequestOptions<HttpResponseType>
-      | IResponseRequestOptions<HttpResponseType>
-      | IEventsRequestOptions<HttpResponseType>
+    reqOpts?: IAnyRequestOptions<HttpResponseType>
   ): Observable<HttpEvent<T>> | Observable<HttpResponse<T>> | Observable<T> {
     reqOpts = this.onRequesting('PATCH', normalizeRequestOptions(reqOpts));
 

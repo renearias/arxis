@@ -11,7 +11,7 @@ import {
  * Genera un objeto HttpHeaders a partir de una entrada compatible.
  */
 export const normalizeHeadersObject = (
-  headers?: HttpHeaders | Record<string, string | string[]>
+  headers: HttpHeaders | Record<string, string | string[]> | undefined
 ): HttpHeaders => {
   if (!headers || headers instanceof HttpHeaders) {
     headers = headers ?? new HttpHeaders();
