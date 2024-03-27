@@ -22,6 +22,12 @@
       "@arxis/image-processor": [
         "dist/arxis/image-processor/arxis-image-processor",
         "dist/arxis/image-processor"
+      ],
+      "api2": [
+        "dist/api2/api2",
+        "dist/api2",
+        "dist/api2/api2",
+        "dist/api2"
       ]
     }
   },
