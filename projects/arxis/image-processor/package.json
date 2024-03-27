@@ -1,11 +1,13 @@
 {
   "name": "@arxis/image-processor",
   "version": "0.0.3",
+  "dependencies": {
+    "tslib": "^2.0.0"
+  },
   "peerDependencies": {
     "@angular/common": "^9.0.3",
     "@angular/core": "^9.0.3",
     "@capacitor/core": "^2.4.2",
-    "@ionic-native/camera": "^5.23.0",
-    "tslib": "^2.0.0"
+    "@ionic-native/camera": "^5.23.0"
   }
 }
