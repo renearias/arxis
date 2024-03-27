@@ -8,5 +8,6 @@
   },
   "devDependencies": {
     "prettier": "*"
-  }
+  },
+  "postinstall": "ngcc"
 }
