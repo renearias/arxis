@@ -5,9 +5,9 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "build:api": "cd projects/arxis/api && npm version patch && ng build @arxis/api --prod",
-    "build:fireauth": "cd projects/arxis/fireauth && npm version patch && ng build @arxis/fireauth --prod",
-    "build:image-processor": "cd projects/arxis/image-processor && npm version patch && ng build @arxis/image-processor --prod",
+    "build:api": "cd projects/arxis/api && npm version patch && ng build @arxis/api --configuration production",
+    "build:fireauth": "cd projects/arxis/fireauth && npm version patch && ng build @arxis/fireauth --configuration production",
+    "build:image-processor": "cd projects/arxis/image-processor && npm version patch && ng build @arxis/image-processor --configuration production",
     "deploy:api": "npm run build:api && npm run publish:api ",
     "deploy:fireauth": "npm run build:fireauth && npm run publish:fireauth ",
     "deploy:image-processor": "npm run build:image-processor && npm run publish:image-processor ",
@@ -37,10 +37,10 @@
     "lodash": "^4.17.20",
     "rxjs": "^6.6.3",
     "tslib": "^2.0.0",
-    "zone.js": "~0.10.3"
+    "zone.js": "~0.11.4"
   },
   "devDependencies": {
-    "@angular/cli": "~11.2.19",
+    "@angular/cli": "~12.2.18",
     "@angular/compiler-cli": "~11.2.14",
     "@angular/language-service": "~11.2.14",
     "@types/jasmine": "~3.3.8",
