@@ -1,13 +1,12 @@
 {
   "name": "@arxis/api",
-  "version": "1.3.2",
+  "version": "1.3.7",
   "peerDependencies": {
     "@angular/common": "^10.0.0 || ^11.0.0 || ^12.0.0 || ^13.3.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0",
     "@angular/core": "^10.0.0 || ^11.0.0 || ^12.0.0 || ^13.3.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0",
-    "tslib": "^2.3.0"
+    "tslib": "^2.6.2"
   },
   "devDependencies": {
     "prettier": "*"
-  },
-  "postinstall": "ngcc"
+  }
 }
