@@ -110,9 +110,12 @@ export class ApiService {
     params?: HttpParams | Record<string, string | string[]> | null,
     reqOpts?: IAnyRequestOptions<HttpResponseType>
   ): Observable<HttpEvent<T>> | Observable<HttpResponse<T>> | Observable<T> {
-    reqOpts = normalizeRequestOptions(reqOpts);
+    reqOpts = normalizeRequestOptions(reqOpts)
 
     if (!!params) {
+      if(!reqOpts){
+        reqOpts = {};
+      }
       reqOpts.params = normalizeQueryParamsObject(params);
     }
 
