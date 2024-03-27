@@ -61,7 +61,7 @@
     "stylus": "^0.54.8",
     "ts-node": "~7.0.0",
     "tslint": "~6.1.0",
-    "typescript": "~4.0.8"
+    "typescript": "4.3.5"
   },
   "description": "[![time tracker](https://wakatime.com/badge/github/renearias/arxis.svg)](https://wakatime.com/badge/github/renearias/arxis)",
   "main": "karma.conf.js",
