@@ -1,9 +1,26 @@
 {
   "name": "@arxis/api",
-  "version": "1.6.2",
+  "version": "1.7.0",
+  "description": "Lightweight, type-safe Angular HTTP client wrapper for REST APIs. Simplifies HttpClient with base URL management, global headers, and full standalone/NgModule support.",
+  "keywords": [
+    "angular",
+    "http",
+    "httpclient",
+    "rest",
+    "api",
+    "api-client",
+    "http-wrapper",
+    "angular-service",
+    "angular-http",
+    "typed-http",
+    "standalone",
+    "provider",
+    "global-headers",
+    "base-url"
+  ],
   "peerDependencies": {
-    "@angular/common": "^10.0.0 || ^11.0.0 || ^12.0.0 || ^13.3.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0",
-    "@angular/core": "^10.0.0 || ^11.0.0 || ^12.0.0 || ^13.3.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0"
+    "@angular/common": "^10.0.0 || ^11.0.0 || ^12.0.0 || ^13.3.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0",
+    "@angular/core": "^10.0.0 || ^11.0.0 || ^12.0.0 || ^13.3.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0"
   },
   "devDependencies": {
     "prettier": "*"

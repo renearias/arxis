@@ -7,3 +7,4 @@ export * from './lib/types';
 export * from './lib/helpers';
 export * from './lib/api.service';
 export * from './lib/api.module';
+export * from './lib/provide-api';
