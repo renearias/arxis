@@ -38,11 +38,13 @@ Use `provideApi()` in your application config:
 ```ts
 // app.config.ts
 import { ApplicationConfig } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
 import { provideApi } from '@arxis/api';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideApi({ url: 'https://api.example.com' }),
+    provideHttpClient(),
+    ...provideApi({ url: 'https://api.example.com' }),
   ],
 };
 ```
@@ -50,10 +52,8 @@ export const appConfig: ApplicationConfig = {
 You can pass additional providers (e.g. interceptors) as extra arguments:
 
 ```ts
-provideApi(
-  { url: 'https://api.example.com' },
-  withInterceptors([authInterceptor]),
-)
+provideHttpClient(withInterceptors([authInterceptor])),
+...provideApi({ url: 'https://api.example.com' }),
 ```
 
 ### NgModule apps (Angular 10+)
