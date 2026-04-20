@@ -1,6 +1,6 @@
 {
   "name": "@arxis/api",
-  "version": "1.7.3",
+  "version": "1.7.4",
   "description": "Lightweight, type-safe Angular HTTP client wrapper for REST APIs. Simplifies HttpClient with base URL management, global headers, and full standalone/NgModule support.",
   "keywords": [
     "angular",
