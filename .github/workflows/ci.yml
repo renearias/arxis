@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  library:
+    name: Build and test @arxis/api
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx ng build @arxis/api --configuration production
+      - run: npm run test:ci
+
+  example:
+    name: Build the StackBlitz example
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: examples/angular-standalone
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - run: npm install --no-audit --no-fund
+      - run: npm run build

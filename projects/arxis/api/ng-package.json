@@ -3,5 +3,9 @@
   "dest": "../../../dist/arxis/api",
   "lib": {
     "entryFile": "src/public-api.ts"
-  }
+  },
+  "assets": [
+    "CHANGELOG.md",
+    "LICENSE"
+  ]
 }

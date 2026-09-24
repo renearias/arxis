@@ -1,25 +1,43 @@
 {
   "name": "@arxis/api",
-  "version": "3.0.0",
-  "description": "Lightweight, type-safe Angular HTTP client wrapper for REST APIs. Simplifies HttpClient with base URL management, global headers, inject() and provideApi() support.",
+  "version": "3.0.1",
+  "description": "Type-safe Angular HTTP client wrapper for REST APIs: base URL, global headers, inject(ApiService) and provideApi(). Angular 17+.",
   "keywords": [
     "angular",
-    "http",
-    "httpclient",
-    "rest",
-    "api",
-    "api-client",
-    "http-wrapper",
-    "angular-service",
+    "angular-library",
     "angular-http",
-    "typed-http",
-    "standalone",
-    "provider",
-    "global-headers",
+    "angular-httpclient",
+    "angular-api",
+    "angular-service",
+    "httpclient",
+    "http-client",
+    "http-wrapper",
+    "rest",
+    "rest-api",
+    "rest-client",
+    "api-client",
+    "typescript",
+    "rxjs",
     "base-url",
+    "global-headers",
     "inject",
-    "provideApi"
+    "provideApi",
+    "standalone"
   ],
+  "homepage": "https://github.com/renearias/arxis#readme",
+  "bugs": {
+    "url": "https://github.com/renearias/arxis/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/renearias/arxis.git",
+    "directory": "projects/arxis/api"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Rene Arias",
+    "url": "https://github.com/renearias"
+  },
   "peerDependencies": {
     "@angular/common": ">=17.0.0",
     "@angular/core": ">=17.0.0",

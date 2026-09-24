@@ -34,13 +34,13 @@
     "ng-packagr": "^17.3.0",
     "typescript": "~5.4.2"
   },
-  "description": "[![time tracker](https://wakatime.com/badge/github/renearias/arxis.svg)](https://wakatime.com/badge/github/renearias/arxis)",
+  "description": "Monorepo of @arxis/api, a type-safe Angular HTTP client wrapper.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/renearias/arxis.git"
   },
-  "author": "Rene Arias <renearias@arxis.la>",
-  "license": "ISC",
+  "author": "Rene Arias",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/renearias/arxis/issues"
   },

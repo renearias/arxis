@@ -1,0 +1,31 @@
+name: Bug report
+description: Something in @arxis/api doesn't work as expected.
+labels: [bug]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: What you did, what you expected and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: A minimal code sample or a StackBlitz link. You can fork the example at https://stackblitz.com/github/renearias/arxis/tree/master/examples/angular-standalone
+      render: ts
+  - type: input
+    id: api-version
+    attributes:
+      label: "@arxis/api version"
+      placeholder: 3.0.0
+    validations:
+      required: true
+  - type: input
+    id: angular-version
+    attributes:
+      label: Angular version
+      placeholder: "20.3.0"
+    validations:
+      required: true

@@ -1,20 +1,74 @@
-# @arxis/api
+# @arxis/api — type-safe HTTP client for Angular
 
-> Lightweight, type-safe Angular HTTP client wrapper — simplify REST API calls with a clean service layer.
+> Stop repeating `HttpClient` boilerplate. Set your REST API base URL and headers once with `provideApi()`, then `inject(ApiService)` anywhere in your Angular app.
 
-[![npm](https://img.shields.io/npm/v/@arxis/api)](https://www.npmjs.com/package/@arxis/api)
-[![Angular](https://img.shields.io/badge/Angular-17%2B-dd0031)](https://angular.dev)
+[![npm version](https://img.shields.io/npm/v/@arxis/api?logo=npm)](https://www.npmjs.com/package/@arxis/api)
+[![npm downloads](https://img.shields.io/npm/dm/@arxis/api)](https://www.npmjs.com/package/@arxis/api)
+[![CI](https://github.com/renearias/arxis/actions/workflows/ci.yml/badge.svg)](https://github.com/renearias/arxis/actions/workflows/ci.yml)
+[![Angular 17+](https://img.shields.io/badge/Angular-17%2B-dd0031?logo=angular)](https://angular.dev)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/renearias/arxis/blob/master/LICENSE)
 
-Stop writing repetitive `HttpClient` boilerplate. `@arxis/api` provides a typed `ApiService` that wraps Angular's `HttpClient` with a consistent interface for GET, POST, PUT, PATCH, and DELETE — with automatic base URL management and global headers. Configure it once with `provideApi()` and get it anywhere with `inject(ApiService)`.
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/renearias/arxis/tree/master/examples/angular-standalone?file=src%2Fapp%2Fposts.service.ts)
 
-## Why use this?
+`@arxis/api` is a small, typed wrapper around Angular's `HttpClient` for REST APIs. It gives you an `ApiService` with `get`, `post`, `put`, `patch` and `delete`, a base URL you configure once, and headers that go with every request. It uses the `HttpClient` of your app, so your interceptors, `withFetch()` and testing tools keep working.
 
-- **Less boilerplate** — No need to repeat `this.http.get(baseUrl + '/endpoint')` everywhere.
-- **Global headers** — Set API keys or fixed headers once, applied to every request automatically.
-- **Type-safe** — Full TypeScript generics for request and response types.
-- **Modern Angular** — `providedIn: 'root'`, `inject()` and `provideApi()` environment providers.
-- **Observable-based** — Returns `Observable<T>`, `Observable<HttpResponse<T>>`, or `Observable<HttpEvent<T>>` depending on your needs.
-- **Zero config** — Just provide a base URL and start making requests.
+## Contents
+
+- [Before and after](#before-and-after)
+- [Features](#features)
+- [Compatibility](#compatibility)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [Multiple APIs](#multiple-apis)
+- [Features in detail](#features-in-detail)
+- [Testing](#testing)
+- [FAQ](#faq)
+- [Migrating from 1.x to 3.0](#migrating-from-1x-to-30)
+
+## Before and after
+
+With `HttpClient`, every service repeats the base URL and the common headers:
+
+```ts
+@Injectable({ providedIn: 'root' })
+export class UserService {
+  private readonly http = inject(HttpClient);
+  private readonly baseUrl = environment.apiUrl;
+  private readonly headers = new HttpHeaders({ 'X-Api-Key': environment.apiKey });
+
+  getUsers() {
+    return this.http.get<User[]>(`${this.baseUrl}/users`, { headers: this.headers });
+  }
+}
+```
+
+With `@arxis/api`, you configure them once and each service only describes its endpoints:
+
+```ts
+// app.config.ts
+provideApi({ url: environment.apiUrl, globalHeaders: { 'X-Api-Key': environment.apiKey } });
+
+// user.service.ts
+@Injectable({ providedIn: 'root' })
+export class UserService {
+  private readonly api = inject(ApiService);
+
+  getUsers() {
+    return this.api.get<User[]>('users');
+  }
+}
+```
+
+## Features
+
+- **Base URL management** — Write `api.get('users')` instead of `http.get(baseUrl + '/users')`.
+- **Global headers** — API keys and fixed headers go with every request automatically.
+- **Type-safe** — Generics for response types, plus typed overloads for `observe: 'response'` and `observe: 'events'`.
+- **Modern Angular** — `providedIn: 'root'`, `inject()`, `provideApi()` environment providers, standalone apps and NgModules.
+- **Multiple APIs** — Extend `ApiService` for each backend, or give a lazy route its own base URL.
+- **Uses your `HttpClient`** — Interceptors, `withFetch()` and `HttpTestingController` work as usual.
+- **Tiny** — About 1 KB minified and gzipped.
 
 ## Compatibility
 
@@ -185,7 +239,7 @@ provideApi({
 })
 ```
 
-Global headers are fixed when the app starts. For values that change, like an auth token, use an `HttpInterceptorFn` with `provideHttpClient(withInterceptors([...]))`.
+Global headers are fixed when the app starts. For values that change, like an auth token, use an interceptor (see the [FAQ](#how-do-i-send-an-auth-token-with-every-request)).
 
 ### Query parameters
 
@@ -210,6 +264,75 @@ api.get<User[]>('users', null, { observe: 'response' });
 // HTTP events (upload progress, etc.)
 api.post<void>('upload', formData, { observe: 'events', reportProgress: true });
 ```
+
+## Testing
+
+`ApiService` uses Angular's `HttpClient`, so you test your services with `HttpTestingController` like any other HTTP code:
+
+```ts
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
+import { provideApi } from '@arxis/api';
+
+it('loads the users', () => {
+  TestBed.configureTestingModule({
+    providers: [
+      provideHttpClient(),
+      provideHttpClientTesting(),
+      provideApi({ url: 'https://api.example.com' }),
+    ],
+  });
+  const users = TestBed.inject(UserService);
+  const httpTesting = TestBed.inject(HttpTestingController);
+
+  users.getUsers().subscribe((list) => expect(list.length).toBe(1));
+
+  httpTesting.expectOne('https://api.example.com/users').flush([{ id: 1 }]);
+  httpTesting.verify();
+});
+```
+
+## FAQ
+
+### How do I set a base URL for HttpClient in Angular?
+
+Add `provideApi({ url: 'https://api.example.com' })` to your providers and make your requests with `ApiService`. Every endpoint is relative to that URL, so `api.get('users')` requests `https://api.example.com/users`. To change the URL per environment, use `provideApi({ url: environment.apiUrl })`.
+
+### How do I add a header to every HTTP request in Angular?
+
+For fixed values, like an API key or `Accept`, use `globalHeaders` in `provideApi()`. For values that change while the app runs, use an interceptor.
+
+### How do I send an auth token with every request?
+
+Use an `HttpInterceptorFn`. `ApiService` uses your app's `HttpClient`, so the interceptor applies to its requests:
+
+```ts
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const token = inject(AuthService).token();
+  return next(token ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : req);
+};
+
+// app.config.ts
+provideHttpClient(withInterceptors([authInterceptor])),
+provideApi({ url: 'https://api.example.com' }),
+```
+
+### How do I call more than one API with different base URLs?
+
+Extend `ApiService` once per backend and pass its config to `super()`, or use `provideApi()` in the `providers` of a route. See [Multiple APIs](#multiple-apis).
+
+### Does it work with standalone components and NgModules?
+
+Yes. `provideApi()` works in `ApplicationConfig`, in route `providers` and in NgModule `providers`. Inject the service with `inject(ApiService)` or with a constructor parameter.
+
+### Which Angular versions are supported?
+
+Angular 17 and newer, including Angular 22. For Angular 12–16, use `@arxis/api@^1.7.4`.
+
+### Is it compatible with `withFetch()`, SSR and interceptors?
+
+Yes. `@arxis/api` doesn't create its own `HttpClient`; it uses the one you configure with `provideHttpClient()`, with all its features. It has no browser-only code, so it also runs with server-side rendering.
 
 ## Migrating from 1.x to 3.0
 
@@ -239,10 +362,10 @@ api.post<void>('upload', formData, { observe: 'events', reportProgress: true });
 5. **Import everything from `@arxis/api`.** The package now has an `exports` map, so deep imports like `@arxis/api/lib/endpoint-config.interface` can fail to resolve.
 6. **`_apiServiceFactory` was removed.**
 
-## Keywords
+## Contributing
 
-angular http client, angular rest api service, angular api wrapper, angular httpclient wrapper, angular http service, angular api service, typed http client angular, angular standalone api provider, angular inject api service, angular global headers, angular base url configuration
+Issues and pull requests are welcome. See [CONTRIBUTING.md](https://github.com/renearias/arxis/blob/master/CONTRIBUTING.md).
 
 ## License
 
-MIT
+[MIT](https://github.com/renearias/arxis/blob/master/LICENSE) © Rene Arias
