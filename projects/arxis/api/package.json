@@ -1,7 +1,7 @@
 {
   "name": "@arxis/api",
-  "version": "1.7.4",
-  "description": "Lightweight, type-safe Angular HTTP client wrapper for REST APIs. Simplifies HttpClient with base URL management, global headers, and full standalone/NgModule support.",
+  "version": "3.0.0",
+  "description": "Lightweight, type-safe Angular HTTP client wrapper for REST APIs. Simplifies HttpClient with base URL management, global headers, inject() and provideApi() support.",
   "keywords": [
     "angular",
     "http",
@@ -16,17 +16,20 @@
     "standalone",
     "provider",
     "global-headers",
-    "base-url"
+    "base-url",
+    "inject",
+    "provideApi"
   ],
   "peerDependencies": {
-    "@angular/common": "^10.0.0 || ^11.0.0 || ^12.0.0 || ^13.3.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0",
-    "@angular/core": "^10.0.0 || ^11.0.0 || ^12.0.0 || ^13.3.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^20.0.0 || ^21.0.0"
+    "@angular/common": ">=17.0.0",
+    "@angular/core": ">=17.0.0",
+    "rxjs": "^6.5.3 || ^7.4.0"
   },
   "devDependencies": {
     "prettier": "*"
   },
   "dependencies": {
-    "tslib": "^2.0.0"
+    "tslib": "^2.3.0"
   },
-  "postinstall": "ngcc"
+  "sideEffects": false
 }

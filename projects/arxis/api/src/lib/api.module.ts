@@ -1,26 +1,19 @@
 import { NgModule, ModuleWithProviders } from '@angular/core';
 
-import { HttpClientModule, HttpClient } from '@angular/common/http';
-import { ApiService, API_ENDPOINT_CONFIG } from './api.service';
 import { EndPointConfig } from './endpoint-config.interface';
+import { provideApi } from './provide-api';
 
-export function _apiServiceFactory(endpoint: EndPointConfig, http: HttpClient) {
-  return new ApiService(endpoint, http);
-}
-
-@NgModule({
-  declarations: [],
-  imports: [HttpClientModule],
-  exports: [],
-})
+/**
+ * @deprecated Use `provideApi()` in your application providers (it also works in
+ * the `providers` of an NgModule). `HttpClient` must be provided by the app with
+ * `provideHttpClient()`.
+ */
+@NgModule()
 export class ApiModule {
-  static forRoot(enpoint: EndPointConfig): ModuleWithProviders<ApiModule> {
+  static forRoot(endpoint: EndPointConfig): ModuleWithProviders<ApiModule> {
     return {
       ngModule: ApiModule,
-      providers: [
-        { provide: API_ENDPOINT_CONFIG, useValue: enpoint },
-        ApiService,
-      ],
+      providers: [provideApi(endpoint)],
     };
   }
 }

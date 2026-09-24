@@ -1,4 +1,10 @@
-import { Injectable, InjectionToken, Inject } from '@angular/core';
+import {
+  Inject,
+  Injectable,
+  InjectionToken,
+  Optional,
+  inject,
+} from '@angular/core';
 import {
   HttpClient,
   HttpEvent,
@@ -23,20 +29,42 @@ export const API_ENDPOINT_CONFIG: InjectionToken<EndPointConfig> = new Injection
 >('arxis.API_ENDPOINT_CONFIG');
 
 /**
- * Api is a generic REST Api handler. Set your API url first.
+ * Api is a generic REST Api handler. Set your API url first with `provideApi()`.
+ *
+ * Subclasses can target another API by passing their own config to `super()`:
+ *
+ * ```ts
+ * @Injectable({ providedIn: 'root' })
+ * export class BillingApiService extends ApiService {
+ *   constructor() {
+ *     super({ url: 'https://billing.example.com' });
+ *   }
+ * }
+ * ```
  */
-// @dynamic
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class ApiService {
+  public http = inject(HttpClient);
   public readonly url: string;
-  protected readonly globalHeaders: Record<string, string | string[]> = {};
+  protected readonly globalHeaders: Record<string, string | string[]>;
 
+  /**
+   * @param endpoint Endpoint config. When omitted, the one registered with
+   * `provideApi()` (or `ApiModule.forRoot()`) is used.
+   */
   constructor(
-    @Inject(API_ENDPOINT_CONFIG) private endpoint: EndPointConfig,
-    public http: HttpClient
+    @Optional() @Inject(API_ENDPOINT_CONFIG) endpoint?: EndPointConfig | null
   ) {
-    this.url = this.endpoint.url;
-    this.globalHeaders = this.endpoint.globalHeaders ?? {};
+    if (!endpoint) {
+      throw new Error(
+        '[@arxis/api] No endpoint config found for ApiService. ' +
+          "Add `provideApi({ url: '...' })` to your application providers, " +
+          "or pass the config to `super({ url: '...' })` in your subclass."
+      );
+    }
+
+    this.url = endpoint.url;
+    this.globalHeaders = endpoint.globalHeaders ?? {};
   }
 
   /**
