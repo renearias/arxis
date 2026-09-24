@@ -66,6 +66,8 @@ export class UserService {
 
 ## Documentation
 
+New to `@arxis/api`? Start with the introduction on dev.to: [Stop repeating HttpClient boilerplate in Angular](https://dev.to/renearias/stop-repeating-httpclient-boilerplate-in-angular-40n6).
+
 The full documentation is in the [package README](projects/arxis/api/README.md):
 
 - [Before and after](projects/arxis/api/README.md#before-and-after): `HttpClient` compared with `ApiService`

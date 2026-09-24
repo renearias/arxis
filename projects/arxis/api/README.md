@@ -12,6 +12,8 @@
 
 `@arxis/api` is a small, typed wrapper around Angular's `HttpClient` for REST APIs. It gives you an `ApiService` with `get`, `post`, `put`, `patch` and `delete`, a base URL you configure once, and headers that go with every request. It uses the `HttpClient` of your app, so your interceptors, `withFetch()` and testing tools keep working.
 
+New to `@arxis/api`? Read the introduction on dev.to: [Stop repeating HttpClient boilerplate in Angular](https://dev.to/renearias/stop-repeating-httpclient-boilerplate-in-angular-40n6).
+
 ## Contents
 
 - [Before and after](#before-and-after)
